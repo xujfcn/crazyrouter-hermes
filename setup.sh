@@ -51,30 +51,30 @@ fi
 echo ""
 echo -e "  ${NC}[2/3] Choose your default model:${NC}"
 echo ""
-echo -e "  ${GRAY}  1) claude-sonnet-4        Anthropic - balanced, recommended${NC}"
-echo -e "  ${GRAY}  2) gpt-4o                 OpenAI - versatile${NC}"
-echo -e "  ${GRAY}  3) deepseek-chat          DeepSeek - cheapest${NC}"
-echo -e "  ${GRAY}  4) gemini-2.5-pro         Google - long context${NC}"
-echo -e "  ${GRAY}  5) qwen-max               Alibaba - multilingual${NC}"
-echo -e "  ${GRAY}  6) claude-opus-4           Anthropic - strongest${NC}"
-echo -e "  ${GRAY}  7) gpt-5                  OpenAI - latest${NC}"
+echo -e "  ${GRAY}  1) claude-opus-4-7         Anthropic Opus 4.7 - strongest${NC}"
+echo -e "  ${GRAY}  2) gpt-5.4                 OpenAI GPT-5.4 - latest${NC}"
+echo -e "  ${GRAY}  3) claude-sonnet-4         Anthropic Sonnet 4 - balanced${NC}"
+echo -e "  ${GRAY}  4) gemini-2.5-pro          Google - long context${NC}"
+echo -e "  ${GRAY}  5) deepseek-chat           DeepSeek - cheapest${NC}"
+echo -e "  ${GRAY}  6) qwen-max                Alibaba - multilingual${NC}"
+echo -e "  ${GRAY}  7) gpt-4o                  OpenAI GPT-4o - versatile${NC}"
 echo -e "  ${GRAY}  8) Custom (enter manually)${NC}"
 echo ""
 read -rp "  Choice [1]: " MODEL_CHOICE
 
 case "${MODEL_CHOICE:-1}" in
-    1) MODEL="claude-sonnet-4" ;;
-    2) MODEL="gpt-4o" ;;
-    3) MODEL="deepseek-chat" ;;
+    1) MODEL="claude-opus-4-7" ;;
+    2) MODEL="gpt-5.4" ;;
+    3) MODEL="claude-sonnet-4" ;;
     4) MODEL="gemini-2.5-pro" ;;
-    5) MODEL="qwen-max" ;;
-    6) MODEL="claude-opus-4" ;;
-    7) MODEL="gpt-5" ;;
+    5) MODEL="deepseek-chat" ;;
+    6) MODEL="qwen-max" ;;
+    7) MODEL="gpt-4o" ;;
     8) read -rp "  Enter model name: " MODEL ;;
-    *) MODEL="claude-sonnet-4" ;;
+    *) MODEL="claude-opus-4-7" ;;
 esac
 
-[[ -z "$MODEL" ]] && MODEL="claude-sonnet-4"
+[[ -z "$MODEL" ]] && MODEL="claude-opus-4-7"
 
 # Step 3: Write config
 echo ""

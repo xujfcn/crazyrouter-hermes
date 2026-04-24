@@ -60,14 +60,14 @@ Write-Host "  [2/3] Choose your default model:" -ForegroundColor White
 Write-Host ""
 
 $models = @(
-    @{ Num = "1"; Name = "claude-sonnet-4";    Desc = "Anthropic - balanced, recommended" }
-    @{ Num = "2"; Name = "gpt-4o";             Desc = "OpenAI - versatile" }
-    @{ Num = "3"; Name = "deepseek-chat";       Desc = "DeepSeek - cheapest" }
-    @{ Num = "4"; Name = "gemini-2.5-pro";      Desc = "Google - long context" }
-    @{ Num = "5"; Name = "qwen-max";            Desc = "Alibaba - multilingual" }
-    @{ Num = "6"; Name = "claude-opus-4";       Desc = "Anthropic - strongest" }
-    @{ Num = "7"; Name = "gpt-5";              Desc = "OpenAI - latest" }
-    @{ Num = "8"; Name = "custom";              Desc = "Enter manually" }
+    @{ Num = "1"; Name = "claude-opus-4-7";     Desc = "Anthropic Opus 4.7 - strongest" }
+    @{ Num = "2"; Name = "gpt-5.4";             Desc = "OpenAI GPT-5.4 - latest" }
+    @{ Num = "3"; Name = "claude-sonnet-4";      Desc = "Anthropic Sonnet 4 - balanced" }
+    @{ Num = "4"; Name = "gemini-2.5-pro";       Desc = "Google - long context" }
+    @{ Num = "5"; Name = "deepseek-chat";        Desc = "DeepSeek - cheapest" }
+    @{ Num = "6"; Name = "qwen-max";             Desc = "Alibaba - multilingual" }
+    @{ Num = "7"; Name = "gpt-4o";              Desc = "OpenAI GPT-4o - versatile" }
+    @{ Num = "8"; Name = "custom";               Desc = "Enter manually" }
 )
 
 foreach ($m in $models) {
@@ -84,7 +84,7 @@ $selectedModel = ($models | Where-Object { $_.Num -eq $choice }).Name
 if ($selectedModel -eq "custom") {
     $selectedModel = Read-Host "  Enter model name"
 }
-if ([string]::IsNullOrWhiteSpace($selectedModel)) { $selectedModel = "claude-sonnet-4" }
+if ([string]::IsNullOrWhiteSpace($selectedModel)) { $selectedModel = "claude-opus-4-7" }
 
 # --- Step 3: Write config ---
 Write-Host ""

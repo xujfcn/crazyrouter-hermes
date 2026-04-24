@@ -42,13 +42,13 @@ setup.bat
 After setup, switch models anytime inside Hermes:
 
 ```
+/model claude-opus-4-7
+/model gpt-5.4
 /model claude-sonnet-4
-/model gpt-4o
-/model deepseek-chat
 /model gemini-2.5-pro
+/model deepseek-chat
 /model qwen-max
-/model claude-opus-4
-/model gpt-5
+/model gpt-4o
 ```
 
 627+ models available. Full list at [crazyrouter.com](https://crazyrouter.com).
@@ -67,7 +67,7 @@ OPENAI_BASE_URL=https://crazyrouter.com/v1
 ```yaml
 model:
   provider: "custom"
-  default: "claude-sonnet-4"
+  default: "claude-opus-4-7"
   base_url: "https://crazyrouter.com/v1"
 ```
 

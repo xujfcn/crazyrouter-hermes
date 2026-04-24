@@ -50,30 +50,30 @@ if "%API_KEY%"=="" (
 echo.
 echo  [2/3] Choose your default model:
 echo.
-echo    1) claude-sonnet-4       (Anthropic, recommended)
-echo    2) gpt-4o                (OpenAI)
-echo    3) deepseek-chat         (DeepSeek, cheapest)
-echo    4) gemini-2.5-pro        (Google)
-echo    5) qwen-max              (Alibaba)
-echo    6) claude-opus-4         (Anthropic, strongest)
-echo    7) gpt-5                 (OpenAI, latest)
+echo    1) claude-opus-4-7      (Anthropic, strongest)
+echo    2) gpt-5.4              (OpenAI, latest)
+echo    3) claude-sonnet-4      (Anthropic, balanced)
+echo    4) gemini-2.5-pro       (Google)
+echo    5) deepseek-chat        (DeepSeek, cheapest)
+echo    6) qwen-max             (Alibaba)
+echo    7) gpt-4o               (OpenAI, versatile)
 echo    8) Custom (enter manually)
 echo.
 set /p "MODEL_CHOICE=  Choice [1]: "
 
 if "%MODEL_CHOICE%"=="" set "MODEL_CHOICE=1"
-if "%MODEL_CHOICE%"=="1" set "MODEL=claude-sonnet-4"
-if "%MODEL_CHOICE%"=="2" set "MODEL=gpt-4o"
-if "%MODEL_CHOICE%"=="3" set "MODEL=deepseek-chat"
+if "%MODEL_CHOICE%"=="1" set "MODEL=claude-opus-4-7"
+if "%MODEL_CHOICE%"=="2" set "MODEL=gpt-5.4"
+if "%MODEL_CHOICE%"=="3" set "MODEL=claude-sonnet-4"
 if "%MODEL_CHOICE%"=="4" set "MODEL=gemini-2.5-pro"
-if "%MODEL_CHOICE%"=="5" set "MODEL=qwen-max"
-if "%MODEL_CHOICE%"=="6" set "MODEL=claude-opus-4"
-if "%MODEL_CHOICE%"=="7" set "MODEL=gpt-5"
+if "%MODEL_CHOICE%"=="5" set "MODEL=deepseek-chat"
+if "%MODEL_CHOICE%"=="6" set "MODEL=qwen-max"
+if "%MODEL_CHOICE%"=="7" set "MODEL=gpt-4o"
 if "%MODEL_CHOICE%"=="8" (
     set /p "MODEL=  Enter model name: "
 )
 
-if "%MODEL%"=="" set "MODEL=claude-sonnet-4"
+if "%MODEL%"=="" set "MODEL=claude-opus-4-7"
 
 :: Write .env file
 echo.
