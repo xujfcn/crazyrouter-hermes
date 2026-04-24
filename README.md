@@ -14,13 +14,13 @@ One-click setup to connect [Hermes Agent](https://github.com/NousResearch/hermes
 ### Linux / macOS / WSL2
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.ps1 | iex
+irm https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.ps1 | iex
 ```
 
 ### Windows (CMD)
@@ -28,7 +28,7 @@ irm https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.ps1 |
 Download and run `setup.bat`:
 
 ```cmd
-curl -o setup.bat https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.bat
+curl -o setup.bat https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.bat
 setup.bat
 ```
 
