@@ -62,12 +62,12 @@ Write-Host ""
 $models = @(
     @{ Num = "1"; Name = "claude-opus-4-7";     Desc = "Anthropic Opus 4.7 - strongest" }
     @{ Num = "2"; Name = "gpt-5.4";             Desc = "OpenAI GPT-5.4 - latest" }
-    @{ Num = "3"; Name = "claude-sonnet-4";      Desc = "Anthropic Sonnet 4 - balanced" }
-    @{ Num = "4"; Name = "gemini-2.5-pro";       Desc = "Google - long context" }
-    @{ Num = "5"; Name = "deepseek-chat";        Desc = "DeepSeek - cheapest" }
-    @{ Num = "6"; Name = "qwen-max";             Desc = "Alibaba - multilingual" }
+    @{ Num = "3"; Name = "claude-sonnet-4.6";    Desc = "Anthropic Sonnet 4.6 - balanced" }
+    @{ Num = "4"; Name = "gemini-3.1-pro";      Desc = "Google Gemini 3.1 Pro" }
+    @{ Num = "5"; Name = "deepseek-chat";       Desc = "DeepSeek - cheapest" }
+    @{ Num = "6"; Name = "qwen-max";            Desc = "Alibaba - multilingual" }
     @{ Num = "7"; Name = "gpt-4o";              Desc = "OpenAI GPT-4o - versatile" }
-    @{ Num = "8"; Name = "custom";               Desc = "Enter manually" }
+    @{ Num = "8"; Name = "custom";              Desc = "Enter manually" }
 )
 
 foreach ($m in $models) {

@@ -44,8 +44,8 @@ After setup, switch models anytime inside Hermes:
 ```
 /model claude-opus-4-7
 /model gpt-5.4
-/model claude-sonnet-4
-/model gemini-2.5-pro
+/model claude-sonnet-4.6
+/model gemini-3.1-pro
 /model deepseek-chat
 /model qwen-max
 /model gpt-4o
