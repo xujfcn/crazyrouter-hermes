@@ -1,0 +1,204 @@
+# Crazyrouter × Hermes Agent - One-Click Setup (PowerShell)
+# Usage: Right-click → Run with PowerShell, or: powershell -ExecutionPolicy Bypass -File hermes-crazyrouter-setup.ps1
+
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+Write-Host ""
+Write-Host "  ╔══════════════════════════════════════════════╗" -ForegroundColor Cyan
+Write-Host "  ║   Crazyrouter × Hermes Agent Setup Script    ║" -ForegroundColor Cyan
+Write-Host "  ║   https://crazyrouter.com                    ║" -ForegroundColor Cyan
+Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host ""
+
+# --- Detect environment ---
+$IsWSL = $false
+$HermesHome = Join-Path $env:USERPROFILE ".hermes"
+
+# Check if running inside WSL
+if ($env:WSL_DISTRO_NAME) {
+    $IsWSL = $true
+    $HermesHome = "$HOME/.hermes"
+}
+
+# Check Hermes installation
+$hermesFound = Get-Command hermes -ErrorAction SilentlyContinue
+if (-not $hermesFound) {
+    Write-Host "  [!] Hermes Agent not detected." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  Install options:" -ForegroundColor White
+    Write-Host "    WSL2/Linux/macOS:" -ForegroundColor Gray
+    Write-Host '    curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash' -ForegroundColor Green
+    Write-Host ""
+    Write-Host "  Continue anyway? (config files will be created for when you install)" -ForegroundColor Yellow
+    $continue = Read-Host "  [Y/n]"
+    if ($continue -eq "n") { exit 1 }
+}
+
+# Create .hermes directory
+if (-not (Test-Path $HermesHome)) {
+    Write-Host "  [*] Creating $HermesHome ..." -ForegroundColor Gray
+    New-Item -ItemType Directory -Path $HermesHome -Force | Out-Null
+}
+
+# --- Step 1: API Key ---
+Write-Host "  [1/3] Enter your Crazyrouter API Key" -ForegroundColor White
+Write-Host "        Get one at: " -NoNewline -ForegroundColor Gray
+Write-Host "https://crazyrouter.com" -ForegroundColor Green
+Write-Host ""
+$apiKey = Read-Host "  API Key"
+
+if ([string]::IsNullOrWhiteSpace($apiKey)) {
+    Write-Host "  [!] API Key cannot be empty." -ForegroundColor Red
+    Read-Host "  Press Enter to exit"
+    exit 1
+}
+
+# --- Step 2: Model selection ---
+Write-Host ""
+Write-Host "  [2/3] Choose your default model:" -ForegroundColor White
+Write-Host ""
+
+$models = @(
+    @{ Num = "1"; Name = "claude-sonnet-4";    Desc = "Anthropic - balanced, recommended" }
+    @{ Num = "2"; Name = "gpt-4o";             Desc = "OpenAI - versatile" }
+    @{ Num = "3"; Name = "deepseek-chat";       Desc = "DeepSeek - cheapest" }
+    @{ Num = "4"; Name = "gemini-2.5-pro";      Desc = "Google - long context" }
+    @{ Num = "5"; Name = "qwen-max";            Desc = "Alibaba - multilingual" }
+    @{ Num = "6"; Name = "claude-opus-4";       Desc = "Anthropic - strongest" }
+    @{ Num = "7"; Name = "gpt-5";              Desc = "OpenAI - latest" }
+    @{ Num = "8"; Name = "custom";              Desc = "Enter manually" }
+)
+
+foreach ($m in $models) {
+    $pad = $m.Name.PadRight(24)
+    Write-Host "    $($m.Num)) $pad $($m.Desc)" -ForegroundColor Gray
+}
+
+Write-Host ""
+$choice = Read-Host "  Choice [1]"
+if ([string]::IsNullOrWhiteSpace($choice)) { $choice = "1" }
+
+$selectedModel = ($models | Where-Object { $_.Num -eq $choice }).Name
+
+if ($selectedModel -eq "custom") {
+    $selectedModel = Read-Host "  Enter model name"
+}
+if ([string]::IsNullOrWhiteSpace($selectedModel)) { $selectedModel = "claude-sonnet-4" }
+
+# --- Step 3: Write config ---
+Write-Host ""
+Write-Host "  [3/3] Writing configuration..." -ForegroundColor White
+
+$envFile = Join-Path $HermesHome ".env"
+$configFile = Join-Path $HermesHome "config.yaml"
+
+# Backup existing files
+if (Test-Path $envFile) {
+    Copy-Item $envFile "$envFile.bak" -Force
+    Write-Host "  [*] Backed up .env → .env.bak" -ForegroundColor Gray
+
+    # Remove old Crazyrouter lines
+    $existingEnv = Get-Content $envFile | Where-Object {
+        $_ -notmatch "^OPENAI_API_KEY=" -and $_ -notmatch "^OPENAI_BASE_URL="
+    }
+    $existingEnv | Set-Content $envFile
+}
+
+# Append Crazyrouter config to .env
+Add-Content $envFile "OPENAI_API_KEY=$apiKey"
+Add-Content $envFile "OPENAI_BASE_URL=https://crazyrouter.com/v1"
+Write-Host "  [OK] .env updated" -ForegroundColor Green
+
+# Handle config.yaml
+if (Test-Path $configFile) {
+    Copy-Item $configFile "$configFile.bak" -Force
+    Write-Host "  [*] Backed up config.yaml → config.yaml.bak" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  [?] config.yaml already exists." -ForegroundColor Yellow
+    Write-Host "      O = Overwrite with Crazyrouter config" -ForegroundColor Gray
+    Write-Host "      K = Keep existing" -ForegroundColor Gray
+    $overwrite = Read-Host "  Choice [O]"
+    if ($overwrite -eq "K" -or $overwrite -eq "k") {
+        Write-Host "  [*] Keeping existing config.yaml" -ForegroundColor Gray
+    } else {
+        $configContent = @"
+# Crazyrouter configuration for Hermes Agent
+# Generated by Crazyrouter setup script
+# All 627+ models: https://crazyrouter.com
+
+model:
+  provider: "custom"
+  default: "$selectedModel"
+  base_url: "https://crazyrouter.com/v1"
+"@
+        Set-Content $configFile $configContent -Encoding UTF8
+        Write-Host "  [OK] config.yaml updated" -ForegroundColor Green
+    }
+} else {
+    $configContent = @"
+# Crazyrouter configuration for Hermes Agent
+# Generated by Crazyrouter setup script
+# All 627+ models: https://crazyrouter.com
+
+model:
+  provider: "custom"
+  default: "$selectedModel"
+  base_url: "https://crazyrouter.com/v1"
+"@
+    Set-Content $configFile $configContent -Encoding UTF8
+    Write-Host "  [OK] config.yaml created" -ForegroundColor Green
+}
+
+# --- Done ---
+Write-Host ""
+Write-Host "  ╔══════════════════════════════════════════════╗" -ForegroundColor Green
+Write-Host "  ║            Setup Complete!                    ║" -ForegroundColor Green
+Write-Host "  ╠══════════════════════════════════════════════╣" -ForegroundColor Green
+Write-Host "  ║                                              ║" -ForegroundColor Green
+Write-Host "  ║  Provider:  Crazyrouter (custom)             ║" -ForegroundColor Green
+Write-Host "  ║  Base URL:  https://crazyrouter.com/v1       ║" -ForegroundColor Green
+Write-Host "  ║  Model:     $($selectedModel.PadRight(33))║" -ForegroundColor Green
+Write-Host "  ║  Config:    ~/.hermes/                       ║" -ForegroundColor Green
+Write-Host "  ║                                              ║" -ForegroundColor Green
+Write-Host "  ║  Run 'hermes' to start chatting!             ║" -ForegroundColor Green
+Write-Host "  ║                                              ║" -ForegroundColor Green
+Write-Host "  ║  Switch models anytime:                      ║" -ForegroundColor Green
+Write-Host "  ║    /model gpt-4o                             ║" -ForegroundColor Green
+Write-Host "  ║    /model claude-sonnet-4                    ║" -ForegroundColor Green
+Write-Host "  ║    /model deepseek-chat                      ║" -ForegroundColor Green
+Write-Host "  ║                                              ║" -ForegroundColor Green
+Write-Host "  ║  627+ models via one API key                 ║" -ForegroundColor Green
+Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host ""
+
+# Quick test option
+Write-Host "  Want to test the connection? [Y/n]" -ForegroundColor Yellow
+$test = Read-Host "  "
+if ($test -ne "n") {
+    Write-Host ""
+    Write-Host "  [*] Testing API connection..." -ForegroundColor Gray
+    try {
+        $headers = @{
+            "Authorization" = "Bearer $apiKey"
+            "Content-Type"  = "application/json"
+        }
+        $body = @{
+            model = $selectedModel
+            messages = @(@{ role = "user"; content = "Say 'Crazyrouter connected!' in one line." })
+            max_tokens = 20
+        } | ConvertTo-Json -Depth 3
+
+        $response = Invoke-RestMethod -Uri "https://crazyrouter.com/v1/chat/completions" `
+            -Method POST -Headers $headers -Body $body -TimeoutSec 30
+
+        $reply = $response.choices[0].message.content
+        Write-Host "  [OK] $reply" -ForegroundColor Green
+    } catch {
+        Write-Host "  [!] Connection test failed: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "  [*] Check your API key and try again." -ForegroundColor Yellow
+    }
+}
+
+Write-Host ""
+Read-Host "  Press Enter to exit"

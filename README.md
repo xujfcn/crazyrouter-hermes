@@ -1,113 +1,84 @@
-# Hermes Agent × Crazyrouter
+# Crazyrouter × Hermes Agent Setup
 
-> Use [Hermes Agent](https://github.com/nousresearch/hermes-agent) with [Crazyrouter](https://crazyrouter.com) — one API key for 600+ AI models, at prices 30-50% below going direct.
+One-click setup to connect [Hermes Agent](https://github.com/NousResearch/hermes-agent) with [Crazyrouter](https://crazyrouter.com) — access 627+ AI models through a single API key.
 
-## Why Crazyrouter?
+## What This Does
 
-Hermes uses OpenRouter by default. Crazyrouter is a **drop-in replacement** with the same API format — just a different base URL and API key. Benefits:
+- Configures Hermes Agent to use Crazyrouter as the AI provider
+- Sets `https://crazyrouter.com/v1` as the base URL
+- Lets you pick a default model (Claude, GPT, DeepSeek, Gemini, Qwen, etc.)
+- Optionally tests the connection
 
-| Feature | OpenRouter | Crazyrouter |
-|---------|-----------|-------------|
-| Models | 300+ | 600+ |
-| Pricing | Standard | 30-50% cheaper |
-| API format | OpenAI-compatible | OpenAI-compatible ✅ |
-| Free tier | ✅ | ✅ |
+## Quick Start
 
-## Quick Setup (One Command)
+### Linux / macOS / WSL2
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-crazyrouter.sh | bash
+curl -fsSL https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.sh | bash
 ```
 
-Or with your API key pre-set:
+### Windows (PowerShell)
 
-```bash
-CRAZYROUTER_API_KEY=your-key-here curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-crazyrouter.sh | bash
+```powershell
+irm https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.ps1 | iex
 ```
 
-Get your free API key at [crazyrouter.com](https://crazyrouter.com).
+### Windows (CMD)
+
+Download and run `setup.bat`:
+
+```cmd
+curl -o setup.bat https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.bat
+setup.bat
+```
+
+## Prerequisites
+
+- [Hermes Agent](https://github.com/NousResearch/hermes-agent) installed
+- A Crazyrouter API key — get one at [crazyrouter.com](https://crazyrouter.com)
+
+## Available Models
+
+After setup, switch models anytime inside Hermes:
+
+```
+/model claude-sonnet-4
+/model gpt-4o
+/model deepseek-chat
+/model gemini-2.5-pro
+/model qwen-max
+/model claude-opus-4
+/model gpt-5
+```
+
+627+ models available. Full list at [crazyrouter.com](https://crazyrouter.com).
 
 ## Manual Setup
 
-### 1. Install Hermes Agent
+If you prefer to configure manually:
 
-```bash
-pip install hermes-agent
+**~/.hermes/.env**
+```
+OPENAI_API_KEY=sk-your-crazyrouter-key
+OPENAI_BASE_URL=https://crazyrouter.com/v1
 ```
 
-### 2. Configure provider
-
-Edit `~/.hermes/config.yaml`:
-
+**~/.hermes/config.yaml**
 ```yaml
 model:
-  provider: "openrouter"          # reuse OpenRouter-compatible path
+  provider: "custom"
+  default: "claude-sonnet-4"
   base_url: "https://crazyrouter.com/v1"
-  default: "anthropic/claude-opus-4.6"
 ```
 
-### 3. Set API key
+## What is Crazyrouter?
 
-Edit `~/.hermes/.env`:
+Crazyrouter is an AI API gateway that gives you access to 627+ models (OpenAI, Anthropic, Google, DeepSeek, Qwen, and more) through a single API key and a single OpenAI-compatible endpoint. Pay-as-you-go, no subscriptions.
 
-```bash
-OPENROUTER_API_KEY=your-crazyrouter-api-key
-```
+- 🌐 Website: [crazyrouter.com](https://crazyrouter.com)
+- 📖 Docs: [docs.crazyrouter.com](https://docs.crazyrouter.com)
+- 💬 Telegram: [t.me/crzrouter](https://t.me/crzrouter)
 
-> Hermes reads `OPENROUTER_API_KEY` when `provider: "openrouter"` is set.
-> Crazyrouter's API is fully compatible — no code changes needed.
+## License
 
-### 4. Start Hermes
-
-```bash
-hermes
-```
-
-## Switching Models
-
-Crazyrouter gives you access to all major model families:
-
-```bash
-hermes model
-```
-
-Popular choices:
-
-| Model | Use case | Approx. cost |
-|-------|----------|-------------|
-| `anthropic/claude-opus-4.6` | Best reasoning, coding | ~$15/M tokens |
-| `anthropic/claude-sonnet-4-5` | Balanced speed/quality | ~$3/M tokens |
-| `openai/gpt-5.2` | General purpose | ~$12/M tokens |
-| `google/gemini-3-pro` | Multimodal, long context | ~$7/M tokens |
-| `deepseek/deepseek-r2` | Budget reasoning | ~$0.5/M tokens |
-| `google/gemini-3-flash` | Fast, cheap | ~$0.1/M tokens |
-
-## Verify Setup
-
-```bash
-hermes chat "what model are you using and what is your base URL?"
-```
-
-## Troubleshooting
-
-**Error: invalid API key**
-→ Check your key at [crazyrouter.com/dashboard](https://crazyrouter.com/dashboard)
-
-**Error: model not found**
-→ Run `hermes model list` to see available models
-
-**Want to switch back to OpenRouter?**
-
-```yaml
-# ~/.hermes/config.yaml
-model:
-  provider: "openrouter"
-  base_url: "https://openrouter.ai/api/v1"  # restore default
-```
-
-## Links
-
-- [Crazyrouter](https://crazyrouter.com) — AI API gateway
-- [Hermes Agent](https://github.com/nousresearch/hermes-agent) — The agent
-- [Crazyrouter Docs](https://crazyrouter.com/docs) — API reference
-- [Crazyrouter Pricing](https://crazyrouter.com/pricing) — Model pricing
+MIT
