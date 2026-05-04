@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Crazyrouter × Hermes Agent - One-Click Setup (Linux/macOS/WSL2)
-# Usage: curl -fsSL https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
 
-set -e
+set -eo pipefail
 
 HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
 BASE_URL="https://crazyrouter.com/v1"
@@ -154,21 +154,31 @@ read -rp "  Test the connection? [Y/n] " TEST
 if [[ "$TEST" != "n" && "$TEST" != "N" ]]; then
     echo ""
     echo -e "  ${GRAY}[*] Testing API connection...${NC}"
-    RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/chat/completions" \
-        -H "Authorization: Bearer $API_KEY" \
-        -H "Content-Type: application/json" \
-        -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Say 'Crazyrouter connected!' in one line.\"}],\"max_tokens\":20}" \
-        2>/dev/null) || true
 
-    HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-    BODY=$(echo "$RESPONSE" | sed '$d')
+    if command -v jq &>/dev/null; then
+        RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/chat/completions" \
+            -H "Authorization: Bearer $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg model "$MODEL" '{
+                model: $model,
+                messages: [{role: "user", content: "Say '\''Crazyrouter connected!'\'' in one line."}],
+                max_tokens: 20
+            }')" \
+            2>/dev/null) || true
 
-    if [[ "$HTTP_CODE" == "200" ]]; then
-        REPLY=$(echo "$BODY" | grep -o '"content":"[^"]*"' | head -1 | sed 's/"content":"//;s/"$//')
-        echo -e "  ${GREEN}[OK] $REPLY${NC}"
+        HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+        BODY=$(echo "$RESPONSE" | sed '$d')
+
+        if [[ "$HTTP_CODE" == "200" ]]; then
+            REPLY=$(echo "$BODY" | jq -r '.choices[0].message.content // empty')
+            echo -e "  ${GREEN}[OK] $REPLY${NC}"
+        else
+            echo -e "  ${RED}[!] Connection test failed (HTTP $HTTP_CODE)${NC}"
+            echo -e "  ${YELLOW}[*] Check your API key and try again.${NC}"
+        fi
     else
-        echo -e "  ${RED}[!] Connection test failed (HTTP $HTTP_CODE)${NC}"
-        echo -e "  ${YELLOW}[*] Check your API key and try again.${NC}"
+        echo -e "  ${YELLOW}[!] jq not installed — skipping connection test.${NC}"
+        echo -e "  ${GRAY}    Install jq: brew install jq (macOS) or apt install jq (Linux)${NC}"
     fi
 fi
 
