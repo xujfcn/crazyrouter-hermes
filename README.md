@@ -6,7 +6,7 @@ One-click setup to connect [Hermes Agent](https://github.com/NousResearch/hermes
 
 - Configures Hermes Agent to use Crazyrouter as the AI provider
 - Sets `https://cn.crazyrouter.com/v1` as the default base URL
-- Lets you pick a default model (Claude, GPT, DeepSeek, Gemini, Qwen, etc.)
+- Lets you pick a default model (Claude, GPT, DeepSeek, Gemini, etc.)
 - Optionally tests the connection
 
 ## 中文说明
@@ -60,8 +60,7 @@ After setup, switch models anytime inside Hermes:
 /model gpt-5.4
 /model claude-sonnet-4.6
 /model gemini-3.1-pro
-/model deepseek-chat
-/model qwen-max
+/model deepseek-v4-flash
 /model gpt-4o
 ```
 
@@ -87,7 +86,7 @@ model:
 
 ## What is Crazyrouter?
 
-Crazyrouter is an AI API gateway that gives you access to 627+ models (OpenAI, Anthropic, Google, DeepSeek, Qwen, and more) through a single API key and a single OpenAI-compatible endpoint. Pay-as-you-go, no subscriptions.
+Crazyrouter is an AI API gateway that gives you access to 627+ models (OpenAI, Anthropic, Google, DeepSeek, Gemini, and more) through a single API key and a single OpenAI-compatible endpoint. Pay-as-you-go, no subscriptions.
 
 - 🌐 Website: [cn.crazyrouter.com](https://cn.crazyrouter.com)
 - 📖 Docs: [docs.crazyrouter.com](https://docs.crazyrouter.com)

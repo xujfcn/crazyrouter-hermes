@@ -54,10 +54,9 @@ echo    1) claude-opus-4-8      (Anthropic, strongest)
 echo    2) gpt-5.5              (OpenAI, latest)
 echo    3) claude-sonnet-4.6    (Anthropic, balanced)
 echo    4) gemini-3.1-pro       (Google)
-echo    5) deepseek-chat        (DeepSeek, cheapest)
-echo    6) qwen-max             (Alibaba)
-echo    7) gpt-4o               (OpenAI, versatile)
-echo    8) Custom (enter manually)
+echo    5) deepseek-v4-flash        (DeepSeek V4 Flash, fast)
+echo    6) gpt-4o               (OpenAI, versatile)
+echo    7) Custom (enter manually)
 echo.
 set /p "MODEL_CHOICE=  Choice [1]: "
 
@@ -66,10 +65,9 @@ if "%MODEL_CHOICE%"=="1" set "MODEL=claude-opus-4-8"
 if "%MODEL_CHOICE%"=="2" set "MODEL=gpt-5.5"
 if "%MODEL_CHOICE%"=="3" set "MODEL=claude-sonnet-4.6"
 if "%MODEL_CHOICE%"=="4" set "MODEL=gemini-3.1-pro"
-if "%MODEL_CHOICE%"=="5" set "MODEL=deepseek-chat"
-if "%MODEL_CHOICE%"=="6" set "MODEL=qwen-max"
-if "%MODEL_CHOICE%"=="7" set "MODEL=gpt-4o"
-if "%MODEL_CHOICE%"=="8" (
+if "%MODEL_CHOICE%"=="5" set "MODEL=deepseek-v4-flash"
+if "%MODEL_CHOICE%"=="6" set "MODEL=gpt-4o"
+if "%MODEL_CHOICE%"=="7" (
     set /p "MODEL=  Enter model name: "
 )
 
@@ -151,7 +149,7 @@ echo  ║                                              ║
 echo  ║  Switch models anytime with:                 ║
 echo  ║    /model claude-opus-4-8                       ║
 echo  ║    /model gpt-5.5                               ║
-echo  ║    /model deepseek-chat                      ║
+echo  ║    /model deepseek-v4-flash                      ║
 echo  ║                                              ║
 echo  ║  627+ models available via Crazyrouter       ║
 echo  ╚══════════════════════════════════════════════╝

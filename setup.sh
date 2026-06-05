@@ -55,10 +55,9 @@ echo -e "  ${GRAY}  1) claude-opus-4-8         Anthropic Opus 4.8 - strongest${N
 echo -e "  ${GRAY}  2) gpt-5.5                 OpenAI GPT-5.5 - latest${NC}"
 echo -e "  ${GRAY}  3) claude-sonnet-4.6       Anthropic Sonnet 4.6 - balanced${NC}"
 echo -e "  ${GRAY}  4) gemini-3.1-pro         Google Gemini 3.1 Pro${NC}"
-echo -e "  ${GRAY}  5) deepseek-chat           DeepSeek - cheapest${NC}"
-echo -e "  ${GRAY}  6) qwen-max                Alibaba - multilingual${NC}"
-echo -e "  ${GRAY}  7) gpt-4o                  OpenAI GPT-4o - versatile${NC}"
-echo -e "  ${GRAY}  8) Custom (enter manually)${NC}"
+echo -e "  ${GRAY}  5) deepseek-v4-flash           DeepSeek V4 Flash - fast${NC}"
+echo -e "  ${GRAY}  6) gpt-4o                  OpenAI GPT-4o - versatile${NC}"
+echo -e "  ${GRAY}  7) Custom (enter manually)${NC}"
 echo ""
 read -rp "  Choice [1]: " MODEL_CHOICE
 
@@ -67,10 +66,9 @@ case "${MODEL_CHOICE:-1}" in
     2) MODEL="gpt-5.5" ;;
     3) MODEL="claude-sonnet-4.6" ;;
     4) MODEL="gemini-3.1-pro" ;;
-    5) MODEL="deepseek-chat" ;;
-    6) MODEL="qwen-max" ;;
-    7) MODEL="gpt-4o" ;;
-    8) read -rp "  Enter model name: " MODEL ;;
+    5) MODEL="deepseek-v4-flash" ;;
+    6) MODEL="gpt-4o" ;;
+    7) read -rp "  Enter model name: " MODEL ;;
     *) MODEL="claude-opus-4-8" ;;
 esac
 
@@ -143,7 +141,7 @@ echo -e "${GREEN}  ║                                              ║${NC}"
 echo -e "${GREEN}  ║  Switch models anytime:                      ║${NC}"
 echo -e "${GREEN}  ║    /model claude-opus-4-8                       ║${NC}"
 echo -e "${GREEN}  ║    /model gpt-5.5                               ║${NC}"
-echo -e "${GREEN}  ║    /model deepseek-chat                      ║${NC}"
+echo -e "${GREEN}  ║    /model deepseek-v4-flash                      ║${NC}"
 echo -e "${GREEN}  ║                                              ║${NC}"
 echo -e "${GREEN}  ║  627+ models via one API key                 ║${NC}"
 echo -e "${GREEN}  ╚══════════════════════════════════════════════╝${NC}"

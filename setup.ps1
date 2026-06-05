@@ -64,10 +64,9 @@ $models = @(
     @{ Num = "2"; Name = "gpt-5.5";             Desc = "OpenAI GPT-5.5 - latest" }
     @{ Num = "3"; Name = "claude-sonnet-4.6";    Desc = "Anthropic Sonnet 4.6 - balanced" }
     @{ Num = "4"; Name = "gemini-3.1-pro";      Desc = "Google Gemini 3.1 Pro" }
-    @{ Num = "5"; Name = "deepseek-chat";       Desc = "DeepSeek - cheapest" }
-    @{ Num = "6"; Name = "qwen-max";            Desc = "Alibaba - multilingual" }
-    @{ Num = "7"; Name = "gpt-4o";              Desc = "OpenAI GPT-4o - versatile" }
-    @{ Num = "8"; Name = "custom";              Desc = "Enter manually" }
+    @{ Num = "5"; Name = "deepseek-v4-flash";       Desc = "DeepSeek V4 Flash - fast" }
+    @{ Num = "6"; Name = "gpt-4o";              Desc = "OpenAI GPT-4o - versatile" }
+    @{ Num = "7"; Name = "custom";              Desc = "Enter manually" }
 )
 
 foreach ($m in $models) {
@@ -166,7 +165,7 @@ Write-Host "  ║                                              ║" -ForegroundC
 Write-Host "  ║  Switch models anytime:                      ║" -ForegroundColor Green
 Write-Host "  ║    /model claude-opus-4-8                       ║" -ForegroundColor Green
 Write-Host "  ║    /model gpt-5.5                               ║" -ForegroundColor Green
-Write-Host "  ║    /model deepseek-chat                      ║" -ForegroundColor Green
+Write-Host "  ║    /model deepseek-v4-flash                      ║" -ForegroundColor Green
 Write-Host "  ║                                              ║" -ForegroundColor Green
 Write-Host "  ║  627+ models via one API key                 ║" -ForegroundColor Green
 Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor Green

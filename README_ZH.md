@@ -91,8 +91,7 @@ claude-opus-4-7
 gpt-5.4
 claude-sonnet-4.6
 gemini-3.1-pro
-deepseek-chat
-qwen-max
+deepseek-v4-flash
 gpt-4o
 ```
 
@@ -103,7 +102,7 @@ gpt-4o
 /model gpt-5.5
 /model gpt-5.4
 /model claude-opus-4-7
-/model deepseek-chat
+/model deepseek-v4-flash
 ```
 
 ---
