@@ -5,7 +5,7 @@ setlocal EnableDelayedExpansion
 echo.
 echo  ╔══════════════════════════════════════════════╗
 echo  ║   Crazyrouter × Hermes Agent Setup Script    ║
-echo  ║   https://crazyrouter.com                    ║
+echo  ║   https://cn.crazyrouter.com                 ║
 echo  ╚══════════════════════════════════════════════╝
 echo.
 
@@ -35,7 +35,7 @@ if not exist "%HERMES_HOME%" (
 
 :: Prompt for API Key
 echo  [1/3] Enter your Crazyrouter API Key
-echo        (Get one at https://crazyrouter.com)
+echo        (Get one at https://cn.crazyrouter.com)
 echo.
 set /p "API_KEY=  API Key: "
 
@@ -50,8 +50,8 @@ if "%API_KEY%"=="" (
 echo.
 echo  [2/3] Choose your default model:
 echo.
-echo    1) claude-opus-4-7      (Anthropic, strongest)
-echo    2) gpt-5.4              (OpenAI, latest)
+echo    1) claude-opus-4-8      (Anthropic, strongest)
+echo    2) gpt-5.5              (OpenAI, latest)
 echo    3) claude-sonnet-4.6    (Anthropic, balanced)
 echo    4) gemini-3.1-pro       (Google)
 echo    5) deepseek-chat        (DeepSeek, cheapest)
@@ -62,8 +62,8 @@ echo.
 set /p "MODEL_CHOICE=  Choice [1]: "
 
 if "%MODEL_CHOICE%"=="" set "MODEL_CHOICE=1"
-if "%MODEL_CHOICE%"=="1" set "MODEL=claude-opus-4-7"
-if "%MODEL_CHOICE%"=="2" set "MODEL=gpt-5.4"
+if "%MODEL_CHOICE%"=="1" set "MODEL=claude-opus-4-8"
+if "%MODEL_CHOICE%"=="2" set "MODEL=gpt-5.5"
 if "%MODEL_CHOICE%"=="3" set "MODEL=claude-sonnet-4.6"
 if "%MODEL_CHOICE%"=="4" set "MODEL=gemini-3.1-pro"
 if "%MODEL_CHOICE%"=="5" set "MODEL=deepseek-chat"
@@ -73,7 +73,7 @@ if "%MODEL_CHOICE%"=="8" (
     set /p "MODEL=  Enter model name: "
 )
 
-if "%MODEL%"=="" set "MODEL=claude-opus-4-7"
+if "%MODEL%"=="" set "MODEL=claude-opus-4-8"
 
 :: Write .env file
 echo.
@@ -94,7 +94,7 @@ if exist "%HERMES_HOME%\.env" (
 )
 
 >> "%HERMES_HOME%\.env" echo OPENAI_API_KEY=%API_KEY%
->> "%HERMES_HOME%\.env" echo OPENAI_BASE_URL=https://crazyrouter.com/v1
+>> "%HERMES_HOME%\.env" echo OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
 
 echo  [OK] .env updated
 
@@ -113,7 +113,7 @@ if exist "%HERMES_HOME%\config.yaml" (
     echo model:
     echo   provider: "custom"
     echo   default: "%MODEL%"
-    echo   base_url: "https://crazyrouter.com/v1"
+    echo   base_url: "https://cn.crazyrouter.com/v1"
 )
 
 :: If config.yaml exists, ask whether to overwrite or merge
@@ -142,15 +142,15 @@ echo  ║            Setup Complete!                    ║
 echo  ╠══════════════════════════════════════════════╣
 echo  ║                                              ║
 echo  ║  Provider:  Crazyrouter (custom)             ║
-echo  ║  Base URL:  https://crazyrouter.com/v1       ║
+echo  ║  Base URL:  https://cn.crazyrouter.com/v1       ║
 echo  ║  Model:     %MODEL%
 echo  ║  Config:    %HERMES_HOME%                    ║
 echo  ║                                              ║
 echo  ║  Run "hermes" to start chatting!             ║
 echo  ║                                              ║
 echo  ║  Switch models anytime with:                 ║
-echo  ║    /model gpt-4o                             ║
-echo  ║    /model claude-sonnet-4                    ║
+echo  ║    /model claude-opus-4-8                       ║
+echo  ║    /model gpt-5.5                               ║
 echo  ║    /model deepseek-chat                      ║
 echo  ║                                              ║
 echo  ║  627+ models available via Crazyrouter       ║

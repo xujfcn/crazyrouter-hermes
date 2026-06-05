@@ -5,7 +5,7 @@
 set -e
 
 HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
-BASE_URL="https://crazyrouter.com/v1"
+BASE_URL="https://cn.crazyrouter.com/v1"
 
 # Colors
 RED='\033[0;31m'
@@ -18,7 +18,7 @@ NC='\033[0m'
 echo ""
 echo -e "${CYAN}  ╔══════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}  ║   Crazyrouter × Hermes Agent Setup Script    ║${NC}"
-echo -e "${CYAN}  ║   https://crazyrouter.com                    ║${NC}"
+echo -e "${CYAN}  ║   https://cn.crazyrouter.com                 ║${NC}"
 echo -e "${CYAN}  ╚══════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -38,7 +38,7 @@ mkdir -p "$HERMES_HOME"
 
 # Step 1: API Key
 echo -e "  ${NC}[1/3] Enter your Crazyrouter API Key${NC}"
-echo -e "  ${GRAY}      Get one at: https://crazyrouter.com${NC}"
+echo -e "  ${GRAY}      Get one at: https://cn.crazyrouter.com${NC}"
 echo ""
 read -rp "  API Key: " API_KEY
 
@@ -51,8 +51,8 @@ fi
 echo ""
 echo -e "  ${NC}[2/3] Choose your default model:${NC}"
 echo ""
-echo -e "  ${GRAY}  1) claude-opus-4-7         Anthropic Opus 4.7 - strongest${NC}"
-echo -e "  ${GRAY}  2) gpt-5.4                 OpenAI GPT-5.4 - latest${NC}"
+echo -e "  ${GRAY}  1) claude-opus-4-8         Anthropic Opus 4.8 - strongest${NC}"
+echo -e "  ${GRAY}  2) gpt-5.5                 OpenAI GPT-5.5 - latest${NC}"
 echo -e "  ${GRAY}  3) claude-sonnet-4.6       Anthropic Sonnet 4.6 - balanced${NC}"
 echo -e "  ${GRAY}  4) gemini-3.1-pro         Google Gemini 3.1 Pro${NC}"
 echo -e "  ${GRAY}  5) deepseek-chat           DeepSeek - cheapest${NC}"
@@ -63,18 +63,18 @@ echo ""
 read -rp "  Choice [1]: " MODEL_CHOICE
 
 case "${MODEL_CHOICE:-1}" in
-    1) MODEL="claude-opus-4-7" ;;
-    2) MODEL="gpt-5.4" ;;
+    1) MODEL="claude-opus-4-8" ;;
+    2) MODEL="gpt-5.5" ;;
     3) MODEL="claude-sonnet-4.6" ;;
     4) MODEL="gemini-3.1-pro" ;;
     5) MODEL="deepseek-chat" ;;
     6) MODEL="qwen-max" ;;
     7) MODEL="gpt-4o" ;;
     8) read -rp "  Enter model name: " MODEL ;;
-    *) MODEL="claude-opus-4-7" ;;
+    *) MODEL="claude-opus-4-8" ;;
 esac
 
-[[ -z "$MODEL" ]] && MODEL="claude-opus-4-7"
+[[ -z "$MODEL" ]] && MODEL="claude-opus-4-8"
 
 # Step 3: Write config
 echo ""
@@ -134,15 +134,15 @@ echo -e "${GREEN}  ║            Setup Complete!                    ║${NC}"
 echo -e "${GREEN}  ╠══════════════════════════════════════════════╣${NC}"
 echo -e "${GREEN}  ║                                              ║${NC}"
 echo -e "${GREEN}  ║  Provider:  Crazyrouter (custom)             ║${NC}"
-echo -e "${GREEN}  ║  Base URL:  https://crazyrouter.com/v1       ║${NC}"
+echo -e "${GREEN}  ║  Base URL:  https://cn.crazyrouter.com/v1       ║${NC}"
 echo -e "${GREEN}  ║  Model:     ${PADDED_MODEL}║${NC}"
 echo -e "${GREEN}  ║  Config:    ~/.hermes/                       ║${NC}"
 echo -e "${GREEN}  ║                                              ║${NC}"
 echo -e "${GREEN}  ║  Run 'hermes' to start chatting!             ║${NC}"
 echo -e "${GREEN}  ║                                              ║${NC}"
 echo -e "${GREEN}  ║  Switch models anytime:                      ║${NC}"
-echo -e "${GREEN}  ║    /model gpt-4o                             ║${NC}"
-echo -e "${GREEN}  ║    /model claude-sonnet-4                    ║${NC}"
+echo -e "${GREEN}  ║    /model claude-opus-4-8                       ║${NC}"
+echo -e "${GREEN}  ║    /model gpt-5.5                               ║${NC}"
 echo -e "${GREEN}  ║    /model deepseek-chat                      ║${NC}"
 echo -e "${GREEN}  ║                                              ║${NC}"
 echo -e "${GREEN}  ║  627+ models via one API key                 ║${NC}"

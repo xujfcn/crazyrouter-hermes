@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 Write-Host ""
 Write-Host "  ╔══════════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "  ║   Crazyrouter × Hermes Agent Setup Script    ║" -ForegroundColor Cyan
-Write-Host "  ║   https://crazyrouter.com                    ║" -ForegroundColor Cyan
+Write-Host "  ║   https://cn.crazyrouter.com                 ║" -ForegroundColor Cyan
 Write-Host "  ╚══════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
@@ -60,8 +60,8 @@ Write-Host "  [2/3] Choose your default model:" -ForegroundColor White
 Write-Host ""
 
 $models = @(
-    @{ Num = "1"; Name = "claude-opus-4-7";     Desc = "Anthropic Opus 4.7 - strongest" }
-    @{ Num = "2"; Name = "gpt-5.4";             Desc = "OpenAI GPT-5.4 - latest" }
+    @{ Num = "1"; Name = "claude-opus-4-8";     Desc = "Anthropic Opus 4.8 - strongest" }
+    @{ Num = "2"; Name = "gpt-5.5";             Desc = "OpenAI GPT-5.5 - latest" }
     @{ Num = "3"; Name = "claude-sonnet-4.6";    Desc = "Anthropic Sonnet 4.6 - balanced" }
     @{ Num = "4"; Name = "gemini-3.1-pro";      Desc = "Google Gemini 3.1 Pro" }
     @{ Num = "5"; Name = "deepseek-chat";       Desc = "DeepSeek - cheapest" }
@@ -84,7 +84,7 @@ $selectedModel = ($models | Where-Object { $_.Num -eq $choice }).Name
 if ($selectedModel -eq "custom") {
     $selectedModel = Read-Host "  Enter model name"
 }
-if ([string]::IsNullOrWhiteSpace($selectedModel)) { $selectedModel = "claude-opus-4-7" }
+if ([string]::IsNullOrWhiteSpace($selectedModel)) { $selectedModel = "claude-opus-4-8" }
 
 # --- Step 3: Write config ---
 Write-Host ""
@@ -107,7 +107,7 @@ if (Test-Path $envFile) {
 
 # Append Crazyrouter config to .env
 Add-Content $envFile "OPENAI_API_KEY=$apiKey"
-Add-Content $envFile "OPENAI_BASE_URL=https://crazyrouter.com/v1"
+Add-Content $envFile "OPENAI_BASE_URL=https://cn.crazyrouter.com/v1"
 Write-Host "  [OK] .env updated" -ForegroundColor Green
 
 # Handle config.yaml
@@ -130,7 +130,7 @@ if (Test-Path $configFile) {
 model:
   provider: "custom"
   default: "$selectedModel"
-  base_url: "https://crazyrouter.com/v1"
+  base_url: "https://cn.crazyrouter.com/v1"
 "@
         Set-Content $configFile $configContent -Encoding UTF8
         Write-Host "  [OK] config.yaml updated" -ForegroundColor Green
@@ -144,7 +144,7 @@ model:
 model:
   provider: "custom"
   default: "$selectedModel"
-  base_url: "https://crazyrouter.com/v1"
+  base_url: "https://cn.crazyrouter.com/v1"
 "@
     Set-Content $configFile $configContent -Encoding UTF8
     Write-Host "  [OK] config.yaml created" -ForegroundColor Green
@@ -157,15 +157,15 @@ Write-Host "  ║            Setup Complete!                    ║" -Foreground
 Write-Host "  ╠══════════════════════════════════════════════╣" -ForegroundColor Green
 Write-Host "  ║                                              ║" -ForegroundColor Green
 Write-Host "  ║  Provider:  Crazyrouter (custom)             ║" -ForegroundColor Green
-Write-Host "  ║  Base URL:  https://crazyrouter.com/v1       ║" -ForegroundColor Green
+Write-Host "  ║  Base URL:  https://cn.crazyrouter.com/v1       ║" -ForegroundColor Green
 Write-Host "  ║  Model:     $($selectedModel.PadRight(33))║" -ForegroundColor Green
 Write-Host "  ║  Config:    ~/.hermes/                       ║" -ForegroundColor Green
 Write-Host "  ║                                              ║" -ForegroundColor Green
 Write-Host "  ║  Run 'hermes' to start chatting!             ║" -ForegroundColor Green
 Write-Host "  ║                                              ║" -ForegroundColor Green
 Write-Host "  ║  Switch models anytime:                      ║" -ForegroundColor Green
-Write-Host "  ║    /model gpt-4o                             ║" -ForegroundColor Green
-Write-Host "  ║    /model claude-sonnet-4                    ║" -ForegroundColor Green
+Write-Host "  ║    /model claude-opus-4-8                       ║" -ForegroundColor Green
+Write-Host "  ║    /model gpt-5.5                               ║" -ForegroundColor Green
 Write-Host "  ║    /model deepseek-chat                      ║" -ForegroundColor Green
 Write-Host "  ║                                              ║" -ForegroundColor Green
 Write-Host "  ║  627+ models via one API key                 ║" -ForegroundColor Green
@@ -189,7 +189,7 @@ if ($test -ne "n") {
             max_tokens = 20
         } | ConvertTo-Json -Depth 3
 
-        $response = Invoke-RestMethod -Uri "https://crazyrouter.com/v1/chat/completions" `
+        $response = Invoke-RestMethod -Uri "https://cn.crazyrouter.com/v1/chat/completions" `
             -Method POST -Headers $headers -Body $body -TimeoutSec 30
 
         $reply = $response.choices[0].message.content
