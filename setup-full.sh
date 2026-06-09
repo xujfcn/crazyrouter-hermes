@@ -346,7 +346,7 @@ write_config() {
         echo ""
         echo -e "  ${NC}Enter your Crazyrouter API Key${NC}"
         echo -e "  ${GRAY}Get one at: https://cn.crazyrouter.com${NC}"
-        read_prompt "  API Key: " API_KEY true
+        read_prompt "  API Key: " API_KEY false
     fi
 
     if [[ -z "$API_KEY" ]]; then
@@ -406,6 +406,46 @@ EOF
     ok "config.yaml updated"
 }
 
+verify_config() {
+    local env_file="$HERMES_HOME/.env"
+    local config_file="$HERMES_HOME/config.yaml"
+    local failed=false
+
+    echo ""
+    log "Verifying written configuration..."
+
+    if [[ ! -f "$env_file" ]]; then
+        fail "Missing $env_file"
+        failed=true
+    elif grep -Fxq "OPENAI_API_KEY=$API_KEY" "$env_file" \
+        && grep -Fxq "OPENAI_BASE_URL=$BASE_URL" "$env_file" \
+        && grep -Fxq "CRAZYROUTER_API_KEY=$API_KEY" "$env_file"; then
+        ok ".env contains API key and base URL"
+    else
+        fail ".env verification failed"
+        failed=true
+    fi
+
+    if [[ ! -f "$config_file" ]]; then
+        fail "Missing $config_file"
+        failed=true
+    elif grep -Fq 'provider: "custom"' "$config_file" \
+        && grep -Fq "default: \"$MODEL\"" "$config_file" \
+        && grep -Fq "base_url: \"$BASE_URL\"" "$config_file"; then
+        ok "config.yaml contains provider, model, and base_url"
+    else
+        fail "config.yaml verification failed"
+        failed=true
+    fi
+
+    if [[ "$failed" == true ]]; then
+        fail "Configuration write verification failed. Please check $HERMES_HOME."
+        exit 1
+    fi
+
+    ok "Configuration write verified successfully"
+}
+
 test_connection() {
     if [[ "$SKIP_TEST" == true ]]; then
         warn "Skipping API connection test."
@@ -459,6 +499,7 @@ main() {
     install_deps
     install_hermes
     write_config
+    verify_config
     test_connection
     print_summary
 }
