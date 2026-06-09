@@ -21,8 +21,24 @@ https://cn.crazyrouter.com/v1
 
 ## Linux / macOS / WSL2
 
+如果机器上已经安装 Hermes Agent，用轻量配置脚本：
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+```
+
+如果是全新服务器/干净系统，用完整安装脚本。它会从系统环境检查开始，安装基础依赖，安装 Hermes Agent，再写入 Crazyrouter 配置，并可选测试 API 连接：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh | bash
+```
+
+非交互模式：
+
+```bash
+CRAZYROUTER_API_KEY=sk-your-key \
+  bash <(curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh) \
+  --yes --model claude-opus-4-8
 ```
 
 脚本会提示输入 Crazyrouter API Key，并让你选择默认模型。
@@ -109,12 +125,23 @@ gpt-4o
 
 ## 脚本会做什么
 
+### `setup.sh` 轻量配置脚本
+
 - 创建 `~/.hermes` 目录（如果不存在）
 - 写入 `OPENAI_API_KEY`
 - 写入 `OPENAI_BASE_URL=https://cn.crazyrouter.com/v1`
 - 生成或更新 `config.yaml`
 - 覆盖旧配置前生成 `.bak` 备份
 - 可选测试 API 连接
+
+### `setup-full.sh` 完整安装脚本
+
+- 识别 Linux / macOS / WSL2 环境
+- 检查 `curl`、`git`、`python3`、`venv` 等基础依赖
+- 支持 apt / dnf / yum / pacman / zypper / Homebrew 安装依赖
+- 调用 Hermes 官方 installer 安装 Hermes Agent
+- 跳过 Hermes 官方交互配置，统一写入 Crazyrouter 配置
+- 支持 `--yes`、`--api-key`、`--model`、`--skip-deps`、`--skip-test` 等参数
 
 ---
 

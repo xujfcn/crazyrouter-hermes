@@ -8,6 +8,7 @@ One-click setup to connect [Hermes Agent](https://github.com/NousResearch/hermes
 - Sets `https://cn.crazyrouter.com/v1` as the default base URL
 - Lets you pick a default model (Claude, GPT, DeepSeek, Gemini, etc.)
 - Optionally tests the connection
+- Includes `setup-full.sh` for fresh machines: checks system environment, installs missing dependencies, installs Hermes Agent, then writes Crazyrouter config
 
 ## 中文说明
 
@@ -25,8 +26,24 @@ https://cn.crazyrouter.com/v1
 
 ### Linux / macOS / WSL2
 
+If Hermes Agent is already installed, run the lightweight configurator:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+```
+
+For a fresh server or clean system, run the full installer. It checks the OS/package manager, installs basic dependencies, installs Hermes Agent, configures Crazyrouter, and optionally tests the API connection:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh | bash
+```
+
+Non-interactive mode:
+
+```bash
+CRAZYROUTER_API_KEY=sk-your-key \
+  bash <(curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh) \
+  --yes --model claude-opus-4-8
 ```
 
 ### Windows (PowerShell)
