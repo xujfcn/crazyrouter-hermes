@@ -1,11 +1,23 @@
 #!/usr/bin/env bash
 # Crazyrouter × Hermes Agent - One-Click Setup (Linux/macOS/WSL2)
-# Usage: curl -fsSL https://raw.githubusercontent.com/xujfcn/hermes-crazyrouter/main/setup.sh | bash
+#
+# Lightweight configurator for machines where Hermes Agent is already installed.
+# For fresh systems, use setup-full.sh instead.
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+#
+# Non-interactive:
+#   CRAZYROUTER_API_KEY=sk-xxx bash setup.sh --yes --model claude-opus-4-8
 
-set -e
+set -euo pipefail
 
 HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
-BASE_URL="https://cn.crazyrouter.com/v1"
+BASE_URL="${CRAZYROUTER_BASE_URL:-https://cn.crazyrouter.com/v1}"
+API_KEY="${CRAZYROUTER_API_KEY:-}"
+MODEL="${CRAZYROUTER_MODEL:-claude-opus-4-8}"
+YES=false
+SKIP_TEST=false
 
 # Colors
 RED='\033[0;31m'
@@ -15,159 +27,319 @@ YELLOW='\033[1;33m'
 GRAY='\033[0;90m'
 NC='\033[0m'
 
-echo ""
-echo -e "${CYAN}  ╔══════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}  ║   Crazyrouter × Hermes Agent Setup Script    ║${NC}"
-echo -e "${CYAN}  ║   https://cn.crazyrouter.com                 ║${NC}"
-echo -e "${CYAN}  ╚══════════════════════════════════════════════╝${NC}"
-echo ""
+usage() {
+    cat <<'EOF'
+Crazyrouter × Hermes Agent setup
 
-# Check Hermes
-if ! command -v hermes &>/dev/null; then
-    echo -e "  ${YELLOW}[!] Hermes Agent not found.${NC}"
+Usage:
+  setup.sh [options]
+
+Options:
+  --api-key KEY        Crazyrouter API key. You can also set CRAZYROUTER_API_KEY.
+  --model MODEL        Default model. Default: claude-opus-4-8
+  --base-url URL       Base URL. Default: https://cn.crazyrouter.com/v1
+  --hermes-home PATH   Hermes config directory. Default: ~/.hermes
+  --yes, -y            Non-interactive mode.
+  --skip-test          Skip connection test.
+  -h, --help           Show this help.
+
+Examples:
+  curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+
+  CRAZYROUTER_API_KEY=sk-your-key \
+    bash <(curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh) \
+    --yes --model claude-opus-4-8
+
+Fresh machine/full install:
+  curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh | bash
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --api-key)
+            API_KEY="${2:-}"
+            shift 2
+            ;;
+        --model)
+            MODEL="${2:-}"
+            shift 2
+            ;;
+        --base-url)
+            BASE_URL="${2:-}"
+            shift 2
+            ;;
+        --hermes-home)
+            HERMES_HOME="${2:-}"
+            shift 2
+            ;;
+        --yes|-y)
+            YES=true
+            shift
+            ;;
+        --skip-test)
+            SKIP_TEST=true
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}[!] Unknown option: $1${NC}" >&2
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+log() { echo -e "  ${CYAN}→${NC} $*"; }
+ok() { echo -e "  ${GREEN}✓${NC} $*"; }
+warn() { echo -e "  ${YELLOW}⚠${NC} $*"; }
+fail() { echo -e "  ${RED}✗${NC} $*" >&2; }
+
+can_prompt() {
+    [[ -r /dev/tty && -w /dev/tty ]]
+}
+
+read_prompt() {
+    local prompt="$1"
+    local var_name="$2"
+    local silent="${3:-false}"
+    local value=""
+
+    if can_prompt; then
+        if [[ "$silent" == true ]]; then
+            read -r -s -p "$prompt" value </dev/tty
+            printf '\n' >/dev/tty
+        else
+            read -r -p "$prompt" value </dev/tty
+        fi
+    else
+        if [[ "$silent" == true ]]; then
+            read -r -s -p "$prompt" value
+            printf '\n'
+        else
+            read -r -p "$prompt" value
+        fi
+    fi
+
+    printf -v "$var_name" '%s' "$value"
+}
+
+confirm() {
+    local prompt="$1"
+    local answer=""
+    if [[ "$YES" == true ]]; then
+        return 0
+    fi
+    if ! can_prompt && [[ ! -t 0 ]]; then
+        return 1
+    fi
+    read_prompt "  $prompt [Y/n] " answer false
+    [[ -z "$answer" || "$answer" == "y" || "$answer" == "Y" ]]
+}
+
+print_banner() {
     echo ""
-    echo "  Install it first:"
-    echo -e "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash${NC}"
+    echo -e "${CYAN}  ╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}  ║   Crazyrouter × Hermes Agent Setup Script    ║${NC}"
+    echo -e "${CYAN}  ║   https://cn.crazyrouter.com                 ║${NC}"
+    echo -e "${CYAN}  ╚══════════════════════════════════════════════╝${NC}"
     echo ""
-    read -rp "  Continue anyway? Config will be ready when you install. [Y/n] " cont
-    [[ "$cont" == "n" || "$cont" == "N" ]] && exit 1
-fi
+}
 
-# Create .hermes directory
-mkdir -p "$HERMES_HOME"
+check_hermes() {
+    if command -v hermes >/dev/null 2>&1; then
+        ok "Hermes Agent found: $(command -v hermes)"
+        return 0
+    fi
 
-# Step 1: API Key
-echo -e "  ${NC}[1/3] Enter your Crazyrouter API Key${NC}"
-echo -e "  ${GRAY}      Get one at: https://cn.crazyrouter.com${NC}"
-echo ""
-read -rp "  API Key: " API_KEY
+    warn "Hermes Agent not found."
+    echo ""
+    echo "  This lightweight script only configures Crazyrouter."
+    echo "  For a fresh machine, run the full installer instead:"
+    echo -e "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh | bash${NC}"
+    echo ""
 
-if [[ -z "$API_KEY" ]]; then
-    echo -e "  ${RED}[!] API Key cannot be empty.${NC}"
+    if confirm "Continue anyway and only write ~/.hermes config?"; then
+        return 0
+    fi
     exit 1
-fi
+}
 
-# Step 2: Model selection
-echo ""
-echo -e "  ${NC}[2/3] Choose your default model:${NC}"
-echo ""
-echo -e "  ${GRAY}  1) claude-opus-4-8         Anthropic Opus 4.8 - strongest${NC}"
-echo -e "  ${GRAY}  2) gpt-5.5                 OpenAI GPT-5.5 - latest${NC}"
-echo -e "  ${GRAY}  3) claude-sonnet-4.6       Anthropic Sonnet 4.6 - balanced${NC}"
-echo -e "  ${GRAY}  4) gemini-3.1-pro         Google Gemini 3.1 Pro${NC}"
-echo -e "  ${GRAY}  5) deepseek-v4-flash           DeepSeek V4 Flash - fast${NC}"
-echo -e "  ${GRAY}  6) gpt-4o                  OpenAI GPT-4o - versatile${NC}"
-echo -e "  ${GRAY}  7) Custom (enter manually)${NC}"
-echo ""
-read -rp "  Choice [1]: " MODEL_CHOICE
+prompt_api_key() {
+    if [[ -n "$API_KEY" ]]; then
+        ok "Using API key from CRAZYROUTER_API_KEY/--api-key"
+        return 0
+    fi
 
-case "${MODEL_CHOICE:-1}" in
-    1) MODEL="claude-opus-4-8" ;;
-    2) MODEL="gpt-5.5" ;;
-    3) MODEL="claude-sonnet-4.6" ;;
-    4) MODEL="gemini-3.1-pro" ;;
-    5) MODEL="deepseek-v4-flash" ;;
-    6) MODEL="gpt-4o" ;;
-    7) read -rp "  Enter model name: " MODEL ;;
-    *) MODEL="claude-opus-4-8" ;;
-esac
+    if [[ "$YES" == true || (! -t 0 && ! -r /dev/tty) ]]; then
+        fail "API key is required."
+        echo ""
+        echo "  Interactive usage:"
+        echo -e "  ${GREEN}curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash${NC}"
+        echo ""
+        echo "  Non-interactive usage:"
+        echo -e "  ${GREEN}CRAZYROUTER_API_KEY=sk-your-key bash <(curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh) --yes${NC}"
+        exit 1
+    fi
 
-[[ -z "$MODEL" ]] && MODEL="claude-opus-4-8"
+    echo -e "  ${NC}[1/3] Enter your Crazyrouter API Key${NC}"
+    echo -e "  ${GRAY}      Get one at: https://cn.crazyrouter.com${NC}"
+    echo ""
+    read_prompt "  API Key: " API_KEY true
 
-# Step 3: Write config
-echo ""
-echo -e "  ${NC}[3/3] Writing configuration...${NC}"
+    if [[ -z "$API_KEY" ]]; then
+        fail "API Key cannot be empty."
+        echo -e "  ${GRAY}Tip: paste the key after the prompt, or run with CRAZYROUTER_API_KEY=sk-your-key.${NC}"
+        exit 1
+    fi
+}
 
-ENV_FILE="$HERMES_HOME/.env"
-CONFIG_FILE="$HERMES_HOME/config.yaml"
+choose_model() {
+    if [[ "$YES" == true || (! -t 0 && ! -r /dev/tty) ]]; then
+        return 0
+    fi
 
-# Backup and update .env
-if [[ -f "$ENV_FILE" ]]; then
-    cp "$ENV_FILE" "$ENV_FILE.bak"
-    echo -e "  ${GRAY}[*] Backed up .env → .env.bak${NC}"
-    # Remove old entries
-    grep -v "^OPENAI_API_KEY=" "$ENV_FILE" | grep -v "^OPENAI_BASE_URL=" > "$ENV_FILE.tmp" || true
-    mv "$ENV_FILE.tmp" "$ENV_FILE"
-fi
+    echo ""
+    echo -e "  ${NC}[2/3] Choose your default model:${NC}"
+    echo ""
+    echo -e "  ${GRAY}  1) claude-opus-4-8       Anthropic Opus 4.8 - strongest${NC}"
+    echo -e "  ${GRAY}  2) gpt-5.5               OpenAI GPT-5.5 - latest${NC}"
+    echo -e "  ${GRAY}  3) claude-sonnet-4.6     Anthropic Sonnet 4.6 - balanced${NC}"
+    echo -e "  ${GRAY}  4) gemini-3.1-pro        Google Gemini 3.1 Pro${NC}"
+    echo -e "  ${GRAY}  5) deepseek-v4-flash     DeepSeek V4 Flash - fast${NC}"
+    echo -e "  ${GRAY}  6) gpt-4o                OpenAI GPT-4o - versatile${NC}"
+    echo -e "  ${GRAY}  7) Custom                Enter manually${NC}"
+    echo ""
+    read_prompt "  Choice [1]: " MODEL_CHOICE false
 
-echo "OPENAI_API_KEY=$API_KEY" >> "$ENV_FILE"
-echo "OPENAI_BASE_URL=$BASE_URL" >> "$ENV_FILE"
-chmod 600 "$ENV_FILE"
-echo -e "  ${GREEN}[OK] .env updated${NC}"
+    case "${MODEL_CHOICE:-1}" in
+        1) MODEL="claude-opus-4-8" ;;
+        2) MODEL="gpt-5.5" ;;
+        3) MODEL="claude-sonnet-4.6" ;;
+        4) MODEL="gemini-3.1-pro" ;;
+        5) MODEL="deepseek-v4-flash" ;;
+        6) MODEL="gpt-4o" ;;
+        7) read_prompt "  Enter model name: " MODEL false ;;
+        *) MODEL="claude-opus-4-8" ;;
+    esac
 
-# Write config.yaml
-CONFIG_CONTENT="# Crazyrouter configuration for Hermes Agent
+    [[ -z "$MODEL" ]] && MODEL="claude-opus-4-8"
+}
+
+write_config() {
+    mkdir -p "$HERMES_HOME"
+
+    local env_file="$HERMES_HOME/.env"
+    local config_file="$HERMES_HOME/config.yaml"
+
+    echo ""
+    echo -e "  ${NC}[3/3] Writing configuration...${NC}"
+
+    if [[ -f "$env_file" ]]; then
+        cp "$env_file" "$env_file.bak.$(date +%Y%m%d%H%M%S)"
+        grep -v -E '^(OPENAI_API_KEY|OPENAI_BASE_URL|CRAZYROUTER_API_KEY)=' "$env_file" > "$env_file.tmp" || true
+        mv "$env_file.tmp" "$env_file"
+        echo -e "  ${GRAY}[*] Backed up .env${NC}"
+    fi
+
+    cat >> "$env_file" <<EOF
+OPENAI_API_KEY=$API_KEY
+OPENAI_BASE_URL=$BASE_URL
+CRAZYROUTER_API_KEY=$API_KEY
+EOF
+    chmod 600 "$env_file"
+    ok ".env updated"
+
+    if [[ -f "$config_file" ]]; then
+        cp "$config_file" "$config_file.bak.$(date +%Y%m%d%H%M%S)"
+        echo -e "  ${GRAY}[*] Backed up config.yaml${NC}"
+
+        if [[ "$YES" != true && ( -t 0 || -r /dev/tty ) ]]; then
+            echo ""
+            echo -e "  ${YELLOW}[?] config.yaml already exists.${NC}"
+            echo -e "  ${GRAY}    O = Overwrite with Crazyrouter config${NC}"
+            echo -e "  ${GRAY}    K = Keep existing${NC}"
+            read_prompt "  Choice [O]: " OVERWRITE false
+            if [[ "$OVERWRITE" == "K" || "$OVERWRITE" == "k" ]]; then
+                echo -e "  ${GRAY}[*] Keeping existing config.yaml${NC}"
+                return 0
+            fi
+        fi
+    fi
+
+    cat > "$config_file" <<EOF
+# Crazyrouter configuration for Hermes Agent
 # Generated by Crazyrouter setup script
-# All 627+ models: https://crazyrouter.com
+# Docs: https://docs.crazyrouter.com
 
 model:
-  provider: \"custom\"
-  default: \"$MODEL\"
-  base_url: \"$BASE_URL\""
+  provider: "custom"
+  default: "$MODEL"
+  base_url: "$BASE_URL"
+EOF
+    ok "config.yaml updated"
+}
 
-if [[ -f "$CONFIG_FILE" ]]; then
-    cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
-    echo -e "  ${GRAY}[*] Backed up config.yaml → config.yaml.bak${NC}"
-    echo ""
-    echo -e "  ${YELLOW}[?] config.yaml already exists.${NC}"
-    echo -e "  ${GRAY}    O = Overwrite with Crazyrouter config${NC}"
-    echo -e "  ${GRAY}    K = Keep existing${NC}"
-    read -rp "  Choice [O]: " OVERWRITE
-    if [[ "$OVERWRITE" == "K" || "$OVERWRITE" == "k" ]]; then
-        echo -e "  ${GRAY}[*] Keeping existing config.yaml${NC}"
-    else
-        echo "$CONFIG_CONTENT" > "$CONFIG_FILE"
-        echo -e "  ${GREEN}[OK] config.yaml updated${NC}"
+test_connection() {
+    if [[ "$SKIP_TEST" == true ]]; then
+        return 0
     fi
-else
-    echo "$CONFIG_CONTENT" > "$CONFIG_FILE"
-    echo -e "  ${GREEN}[OK] config.yaml created${NC}"
-fi
 
-# Done
-PADDED_MODEL=$(printf "%-33s" "$MODEL")
-echo ""
-echo -e "${GREEN}  ╔══════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}  ║            Setup Complete!                    ║${NC}"
-echo -e "${GREEN}  ╠══════════════════════════════════════════════╣${NC}"
-echo -e "${GREEN}  ║                                              ║${NC}"
-echo -e "${GREEN}  ║  Provider:  Crazyrouter (custom)             ║${NC}"
-echo -e "${GREEN}  ║  Base URL:  https://cn.crazyrouter.com/v1       ║${NC}"
-echo -e "${GREEN}  ║  Model:     ${PADDED_MODEL}║${NC}"
-echo -e "${GREEN}  ║  Config:    ~/.hermes/                       ║${NC}"
-echo -e "${GREEN}  ║                                              ║${NC}"
-echo -e "${GREEN}  ║  Run 'hermes' to start chatting!             ║${NC}"
-echo -e "${GREEN}  ║                                              ║${NC}"
-echo -e "${GREEN}  ║  Switch models anytime:                      ║${NC}"
-echo -e "${GREEN}  ║    /model claude-opus-4-8                       ║${NC}"
-echo -e "${GREEN}  ║    /model gpt-5.5                               ║${NC}"
-echo -e "${GREEN}  ║    /model deepseek-v4-flash                      ║${NC}"
-echo -e "${GREEN}  ║                                              ║${NC}"
-echo -e "${GREEN}  ║  627+ models via one API key                 ║${NC}"
-echo -e "${GREEN}  ╚══════════════════════════════════════════════╝${NC}"
-echo ""
+    if [[ "$YES" != true && ( -t 0 || -r /dev/tty ) ]]; then
+        echo ""
+        if ! confirm "Test the connection?"; then
+            return 0
+        fi
+    fi
 
-# Optional connection test
-read -rp "  Test the connection? [Y/n] " TEST
-if [[ "$TEST" != "n" && "$TEST" != "N" ]]; then
     echo ""
     echo -e "  ${GRAY}[*] Testing API connection...${NC}"
-    RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/chat/completions" \
+    local response http_code body reply
+    response="$(curl -sS -w '\n%{http_code}' -X POST "$BASE_URL/chat/completions" \
         -H "Authorization: Bearer $API_KEY" \
         -H "Content-Type: application/json" \
-        -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Say 'Crazyrouter connected!' in one line.\"}],\"max_tokens\":20}" \
-        2>/dev/null) || true
+        -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Say Crazyrouter connected in one short sentence.\"}],\"max_tokens\":30}" \
+        2>/dev/null || true)"
+    http_code="$(printf '%s\n' "$response" | tail -n 1)"
+    body="$(printf '%s\n' "$response" | sed '$d')"
 
-    HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-    BODY=$(echo "$RESPONSE" | sed '$d')
-
-    if [[ "$HTTP_CODE" == "200" ]]; then
-        REPLY=$(echo "$BODY" | grep -o '"content":"[^"]*"' | head -1 | sed 's/"content":"//;s/"$//')
-        echo -e "  ${GREEN}[OK] $REPLY${NC}"
+    if [[ "$http_code" == "200" ]]; then
+        reply="$(printf '%s' "$body" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data.get("choices", [{}])[0].get("message", {}).get("content", "OK"))' 2>/dev/null || true)"
+        ok "${reply:-Connection test passed}"
     else
-        echo -e "  ${RED}[!] Connection test failed (HTTP $HTTP_CODE)${NC}"
-        echo -e "  ${YELLOW}[*] Check your API key and try again.${NC}"
+        warn "Connection test failed (HTTP $http_code). Config was still written."
+        [[ -n "$body" ]] && echo -e "  ${GRAY}${body:0:500}${NC}"
     fi
-fi
+}
 
-echo ""
+print_summary() {
+    local padded_model
+    padded_model="$(printf "%-33s" "$MODEL")"
+    echo ""
+    echo -e "${GREEN}  ╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}  ║            Setup Complete!                   ║${NC}"
+    echo -e "${GREEN}  ╠══════════════════════════════════════════════╣${NC}"
+    echo -e "${GREEN}  ║  Provider:  Crazyrouter (custom)             ║${NC}"
+    echo -e "${GREEN}  ║  Base URL:  $BASE_URL${NC}"
+    echo -e "${GREEN}  ║  Model:     ${padded_model}║${NC}"
+    echo -e "${GREEN}  ║  Config:    $HERMES_HOME${NC}"
+    echo -e "${GREEN}  ║                                              ║${NC}"
+    echo -e "${GREEN}  ║  Run 'hermes' to start chatting.             ║${NC}"
+    echo -e "${GREEN}  ╚══════════════════════════════════════════════╝${NC}"
+    echo ""
+}
+
+main() {
+    print_banner
+    check_hermes
+    prompt_api_key
+    choose_model
+    write_config
+    test_connection
+    print_summary
+}
+
+main "$@"

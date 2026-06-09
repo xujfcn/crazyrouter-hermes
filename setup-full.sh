@@ -123,12 +123,45 @@ ok() { echo -e "  ${GREEN}✓${NC} $*"; }
 warn() { echo -e "  ${YELLOW}⚠${NC} $*"; }
 fail() { echo -e "  ${RED}✗${NC} $*" >&2; }
 
+can_prompt() {
+    [[ -r /dev/tty && -w /dev/tty ]]
+}
+
+read_prompt() {
+    local prompt="$1"
+    local var_name="$2"
+    local silent="${3:-false}"
+    local value=""
+
+    if can_prompt; then
+        if [[ "$silent" == true ]]; then
+            read -r -s -p "$prompt" value </dev/tty
+            printf '\n' >/dev/tty
+        else
+            read -r -p "$prompt" value </dev/tty
+        fi
+    else
+        if [[ "$silent" == true ]]; then
+            read -r -s -p "$prompt" value
+            printf '\n'
+        else
+            read -r -p "$prompt" value
+        fi
+    fi
+
+    printf -v "$var_name" '%s' "$value"
+}
+
 confirm() {
     local prompt="$1"
+    local answer=""
     if [[ "$YES" == true ]]; then
         return 0
     fi
-    read -r -p "  $prompt [Y/n] " answer
+    if ! can_prompt && [[ ! -t 0 ]]; then
+        return 1
+    fi
+    read_prompt "  $prompt [Y/n] " answer false
     [[ -z "$answer" || "$answer" == "y" || "$answer" == "Y" ]]
 }
 
@@ -281,7 +314,7 @@ choose_model() {
     echo -e "  ${GRAY}  6) gpt-4o                OpenAI GPT-4o - versatile${NC}"
     echo -e "  ${GRAY}  7) Custom                Enter manually${NC}"
     echo ""
-    read -r -p "  Choice [1]: " choice
+    read_prompt "  Choice [1]: " choice false
 
     case "${choice:-1}" in
         1) MODEL="claude-opus-4-8" ;;
@@ -290,7 +323,7 @@ choose_model() {
         4) MODEL="gemini-3.1-pro" ;;
         5) MODEL="deepseek-v4-flash" ;;
         6) MODEL="gpt-4o" ;;
-        7) read -r -p "  Enter model name: " MODEL ;;
+        7) read_prompt "  Enter model name: " MODEL false ;;
         *) MODEL="claude-opus-4-8" ;;
     esac
 
@@ -303,14 +336,17 @@ write_config() {
     mkdir -p "$HERMES_HOME"
 
     if [[ -z "$API_KEY" ]]; then
-        if [[ "$YES" == true ]]; then
-            fail "CRAZYROUTER_API_KEY or --api-key is required in --yes mode."
+        if [[ "$YES" == true || (! -t 0 && ! -r /dev/tty) ]]; then
+            fail "CRAZYROUTER_API_KEY or --api-key is required."
+            echo ""
+            echo "  Non-interactive usage:"
+            echo -e "  ${GREEN}CRAZYROUTER_API_KEY=sk-your-key bash <(curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh) --yes${NC}"
             exit 1
         fi
         echo ""
         echo -e "  ${NC}Enter your Crazyrouter API Key${NC}"
         echo -e "  ${GRAY}Get one at: https://cn.crazyrouter.com${NC}"
-        read -r -p "  API Key: " API_KEY
+        read_prompt "  API Key: " API_KEY true
     fi
 
     if [[ -z "$API_KEY" ]]; then
