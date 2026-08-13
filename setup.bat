@@ -52,7 +52,7 @@ echo  [2/3] Choose your default model:
 echo.
 echo    1) claude-opus-4-8      (Anthropic, strongest)
 echo    2) gpt-5.5              (OpenAI, latest)
-echo    3) claude-sonnet-4.6    (Anthropic, balanced)
+echo    3) claude-sonnet-4-6    (Anthropic, balanced)
 echo    4) gemini-3.1-pro       (Google)
 echo    5) deepseek-v4-flash        (DeepSeek V4 Flash, fast)
 echo    6) gpt-4o               (OpenAI, versatile)
@@ -63,7 +63,7 @@ set /p "MODEL_CHOICE=  Choice [1]: "
 if "%MODEL_CHOICE%"=="" set "MODEL_CHOICE=1"
 if "%MODEL_CHOICE%"=="1" set "MODEL=claude-opus-4-8"
 if "%MODEL_CHOICE%"=="2" set "MODEL=gpt-5.5"
-if "%MODEL_CHOICE%"=="3" set "MODEL=claude-sonnet-4.6"
+if "%MODEL_CHOICE%"=="3" set "MODEL=claude-sonnet-4-6"
 if "%MODEL_CHOICE%"=="4" set "MODEL=gemini-3.1-pro"
 if "%MODEL_CHOICE%"=="5" set "MODEL=deepseek-v4-flash"
 if "%MODEL_CHOICE%"=="6" set "MODEL=gpt-4o"
@@ -72,6 +72,13 @@ if "%MODEL_CHOICE%"=="7" (
 )
 
 if "%MODEL%"=="" set "MODEL=claude-opus-4-8"
+set "API_MODE=chat_completions"
+set "MODEL_BASE_URL=https://cn.crazyrouter.com/v1"
+echo %MODEL% | findstr /b /i "claude- anthropic/ anthropic." >nul
+if not errorlevel 1 (
+    set "API_MODE=anthropic_messages"
+    set "MODEL_BASE_URL=https://cn.crazyrouter.com"
+)
 
 :: Write .env file
 echo.
@@ -87,12 +94,13 @@ if exist "%HERMES_HOME%\.env" (
 :: Check if keys already exist in .env, append or create
 if exist "%HERMES_HOME%\.env" (
     :: Remove old Crazyrouter entries if any
-    findstr /v /i "OPENAI_API_KEY OPENAI_BASE_URL" "%HERMES_HOME%\.env" > "%HERMES_HOME%\.env.tmp" 2>nul
+    findstr /v /i "OPENAI_API_KEY OPENAI_BASE_URL CRAZYROUTER_API_KEY" "%HERMES_HOME%\.env" > "%HERMES_HOME%\.env.tmp" 2>nul
     move /y "%HERMES_HOME%\.env.tmp" "%HERMES_HOME%\.env" >nul
 )
 
 >> "%HERMES_HOME%\.env" echo OPENAI_API_KEY=%API_KEY%
 >> "%HERMES_HOME%\.env" echo OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
+>> "%HERMES_HOME%\.env" echo CRAZYROUTER_API_KEY=%API_KEY%
 
 echo  [OK] .env updated
 
@@ -111,7 +119,8 @@ if exist "%HERMES_HOME%\config.yaml" (
     echo model:
     echo   provider: "custom"
     echo   default: "%MODEL%"
-    echo   base_url: "https://cn.crazyrouter.com/v1"
+    echo   base_url: "!MODEL_BASE_URL!"
+    echo   api_mode: "!API_MODE!"
 )
 
 :: If config.yaml exists, ask whether to overwrite or merge

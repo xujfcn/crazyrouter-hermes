@@ -62,7 +62,7 @@ Write-Host ""
 $models = @(
     @{ Num = "1"; Name = "claude-opus-4-8";     Desc = "Anthropic Opus 4.8 - strongest" }
     @{ Num = "2"; Name = "gpt-5.5";             Desc = "OpenAI GPT-5.5 - latest" }
-    @{ Num = "3"; Name = "claude-sonnet-4.6";    Desc = "Anthropic Sonnet 4.6 - balanced" }
+    @{ Num = "3"; Name = "claude-sonnet-4-6";    Desc = "Anthropic Sonnet 4.6 - balanced" }
     @{ Num = "4"; Name = "gemini-3.1-pro";      Desc = "Google Gemini 3.1 Pro" }
     @{ Num = "5"; Name = "deepseek-v4-flash";       Desc = "DeepSeek V4 Flash - fast" }
     @{ Num = "6"; Name = "gpt-4o";              Desc = "OpenAI GPT-4o - versatile" }
@@ -84,6 +84,9 @@ if ($selectedModel -eq "custom") {
     $selectedModel = Read-Host "  Enter model name"
 }
 if ([string]::IsNullOrWhiteSpace($selectedModel)) { $selectedModel = "claude-opus-4-8" }
+$isClaude = $selectedModel -match '^(claude-|anthropic[/.])'
+$apiMode = if ($isClaude) { "anthropic_messages" } else { "chat_completions" }
+$modelBaseUrl = if ($isClaude) { "https://cn.crazyrouter.com" } else { "https://cn.crazyrouter.com/v1" }
 
 # --- Step 3: Write config ---
 Write-Host ""
@@ -99,7 +102,7 @@ if (Test-Path $envFile) {
 
     # Remove old Crazyrouter lines
     $existingEnv = Get-Content $envFile | Where-Object {
-        $_ -notmatch "^OPENAI_API_KEY=" -and $_ -notmatch "^OPENAI_BASE_URL="
+        $_ -notmatch "^OPENAI_API_KEY=" -and $_ -notmatch "^OPENAI_BASE_URL=" -and $_ -notmatch "^CRAZYROUTER_API_KEY="
     }
     $existingEnv | Set-Content $envFile
 }
@@ -107,6 +110,7 @@ if (Test-Path $envFile) {
 # Append Crazyrouter config to .env
 Add-Content $envFile "OPENAI_API_KEY=$apiKey"
 Add-Content $envFile "OPENAI_BASE_URL=https://cn.crazyrouter.com/v1"
+Add-Content $envFile "CRAZYROUTER_API_KEY=$apiKey"
 Write-Host "  [OK] .env updated" -ForegroundColor Green
 
 # Handle config.yaml
@@ -129,7 +133,8 @@ if (Test-Path $configFile) {
 model:
   provider: "custom"
   default: "$selectedModel"
-  base_url: "https://cn.crazyrouter.com/v1"
+  base_url: "$modelBaseUrl"
+  api_mode: "$apiMode"
 "@
         Set-Content $configFile $configContent -Encoding UTF8
         Write-Host "  [OK] config.yaml updated" -ForegroundColor Green
@@ -143,7 +148,8 @@ model:
 model:
   provider: "custom"
   default: "$selectedModel"
-  base_url: "https://cn.crazyrouter.com/v1"
+  base_url: "$modelBaseUrl"
+  api_mode: "$apiMode"
 "@
     Set-Content $configFile $configContent -Encoding UTF8
     Write-Host "  [OK] config.yaml created" -ForegroundColor Green
@@ -188,10 +194,16 @@ if ($test -ne "n") {
             max_tokens = 20
         } | ConvertTo-Json -Depth 3
 
-        $response = Invoke-RestMethod -Uri "https://cn.crazyrouter.com/v1/chat/completions" `
+        $uri = if ($isClaude) { "https://cn.crazyrouter.com/v1/messages" } else { "https://cn.crazyrouter.com/v1/chat/completions" }
+        if ($isClaude) {
+            $headers.Remove("Authorization")
+            $headers["x-api-key"] = $apiKey
+            $headers["anthropic-version"] = "2023-06-01"
+        }
+        $response = Invoke-RestMethod -Uri $uri `
             -Method POST -Headers $headers -Body $body -TimeoutSec 30
 
-        $reply = $response.choices[0].message.content
+        $reply = if ($isClaude) { $response.content[0].text } else { $response.choices[0].message.content }
         Write-Host "  [OK] $reply" -ForegroundColor Green
     } catch {
         Write-Host "  [!] Connection test failed: $($_.Exception.Message)" -ForegroundColor Red

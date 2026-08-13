@@ -66,36 +66,35 @@ setup.bat
 
 ## 手动配置
 
-如果你想手动配置，可以编辑：
-
-```text
-~/.hermes/.env
-```
-
-写入：
+在 `~/.hermes/.env` 中写入：
 
 ```env
-OPENAI_API_KEY=sk-your-crazyrouter-key
-OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
+CRAZYROUTER_API_KEY=sk-your-crazyrouter-key
 ```
 
-然后编辑：
-
-```text
-~/.hermes/config.yaml
-```
-
-写入或更新：
+Claude 必须使用 Anthropic Messages 原生协议：
 
 ```yaml
 model:
   provider: "custom"
   default: "claude-opus-4-8"
-  base_url: "https://cn.crazyrouter.com/v1"
+  base_url: "https://cn.crazyrouter.com"
+  api_mode: "anthropic_messages"
 ```
 
----
+非 Claude 模型使用 OpenAI-compatible Chat Completions：
 
+```yaml
+model:
+  provider: "custom"
+  default: "gpt-5.5"
+  base_url: "https://cn.crazyrouter.com/v1"
+  api_mode: "chat_completions"
+```
+
+Claude 不应配置为 `codex_responses`，也不能请求 `/v1/responses`。在 Claude 和非 Claude 模型族之间切换时，请重新运行安装脚本，让 Hermes 同时更新 Base URL 和 `api_mode`。
+
+---
 ## 默认模型
 
 脚本会让你选择默认模型，常用示例：
@@ -105,7 +104,7 @@ claude-opus-4-8
 gpt-5.5
 claude-opus-4-7
 gpt-5.4
-claude-sonnet-4.6
+claude-sonnet-4-6
 gemini-3.1-pro
 deepseek-v4-flash
 gpt-4o
@@ -149,7 +148,7 @@ gpt-4o
 
 ### 1. 为什么要用 `/v1`？
 
-Hermes 使用 OpenAI-compatible API 形状，Base URL 通常需要以 `/v1` 结尾。
+非 Claude 模型使用 OpenAI-compatible API，Base URL 以 `/v1` 结尾；Claude 使用 Anthropic Messages，Base URL 不带 `/v1`，Hermes 会请求 `/v1/messages`。
 
 正确：
 

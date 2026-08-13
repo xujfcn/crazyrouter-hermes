@@ -108,6 +108,20 @@ fi
 if [[ -z "$BASE_URL" ]]; then
     BASE_URL="https://cn.crazyrouter.com/v1"
 fi
+is_claude_model() {
+    local normalized
+    normalized="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+    [[ "$normalized" == claude-* || "$normalized" == anthropic/* || "$normalized" == anthropic.claude* ]]
+}
+
+configure_model_transport() {
+    API_MODE="chat_completions"
+    MODEL_BASE_URL="$BASE_URL"
+    if is_claude_model "$MODEL"; then
+        API_MODE="anthropic_messages"
+        MODEL_BASE_URL="${BASE_URL%/v1}"
+    fi
+}
 
 print_banner() {
     echo ""
@@ -308,7 +322,7 @@ choose_model() {
     echo ""
     echo -e "  ${GRAY}  1) claude-opus-4-8       Anthropic Opus 4.8 - strongest${NC}"
     echo -e "  ${GRAY}  2) gpt-5.5               OpenAI GPT-5.5 - latest${NC}"
-    echo -e "  ${GRAY}  3) claude-sonnet-4.6     Anthropic Sonnet 4.6 - balanced${NC}"
+    echo -e "  ${GRAY}  3) claude-sonnet-4-6     Anthropic Sonnet 4.6 - balanced${NC}"
     echo -e "  ${GRAY}  4) gemini-3.1-pro        Google Gemini 3.1 Pro${NC}"
     echo -e "  ${GRAY}  5) deepseek-v4-flash     DeepSeek V4 Flash - fast${NC}"
     echo -e "  ${GRAY}  6) gpt-4o                OpenAI GPT-4o - versatile${NC}"
@@ -319,7 +333,7 @@ choose_model() {
     case "${choice:-1}" in
         1) MODEL="claude-opus-4-8" ;;
         2) MODEL="gpt-5.5" ;;
-        3) MODEL="claude-sonnet-4.6" ;;
+        3) MODEL="claude-sonnet-4-6" ;;
         4) MODEL="gemini-3.1-pro" ;;
         5) MODEL="deepseek-v4-flash" ;;
         6) MODEL="gpt-4o" ;;
@@ -355,6 +369,7 @@ write_config() {
     fi
 
     choose_model
+    configure_model_transport
 
     local env_file="$HERMES_HOME/.env"
     local config_file="$HERMES_HOME/config.yaml"
@@ -387,7 +402,8 @@ EOF
 model:
   provider: "custom"
   default: "$MODEL"
-  base_url: "$BASE_URL"
+  base_url: "$MODEL_BASE_URL"
+  api_mode: "$API_MODE"
 
 compression:
   enabled: true
@@ -431,8 +447,8 @@ verify_config() {
         failed=true
     elif grep -Fq 'provider: "custom"' "$config_file" \
         && grep -Fq "default: \"$MODEL\"" "$config_file" \
-        && grep -Fq "base_url: \"$BASE_URL\"" "$config_file"; then
-        ok "config.yaml contains provider, model, and base_url"
+        && grep -Fq "api_mode: \"$API_MODE\"" "$config_file"; then
+        ok "config.yaml contains provider, model, and api_mode"
     else
         fail "config.yaml verification failed"
         failed=true
@@ -458,16 +474,25 @@ test_connection() {
 
     log "Testing API connection..."
     local response http_code body reply
-    response="$(curl -sS -w '\n%{http_code}' -X POST "$BASE_URL/chat/completions" \
-        -H "Authorization: Bearer $API_KEY" \
-        -H "Content-Type: application/json" \
-        -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Say Crazyrouter connected in one short sentence.\"}],\"max_tokens\":30}" \
-        2>/dev/null || true)"
+    if is_claude_model "$MODEL"; then
+        response="$(curl -sS -w '\n%{http_code}' -X POST "${BASE_URL%/v1}/v1/messages" \
+            -H "x-api-key: $API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "Content-Type: application/json" \
+            -d "{\"model\":\"$MODEL\",\"max_tokens\":30,\"messages\":[{\"role\":\"user\",\"content\":\"Say Crazyrouter connected in one short sentence.\"}]}" \
+            2>/dev/null || true)"
+    else
+        response="$(curl -sS -w '\n%{http_code}' -X POST "$BASE_URL/chat/completions" \
+            -H "Authorization: Bearer $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Say Crazyrouter connected in one short sentence.\"}],\"max_tokens\":30}" \
+            2>/dev/null || true)"
+    fi
     http_code="$(printf '%s\n' "$response" | tail -n 1)"
     body="$(printf '%s\n' "$response" | sed '$d')"
 
     if [[ "$http_code" == "200" ]]; then
-        reply="$(printf '%s' "$body" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data.get("choices", [{}])[0].get("message", {}).get("content", "OK"))' 2>/dev/null || true)"
+        reply="$(printf '%s' "$body" | python3 -c 'import json,sys; data=json.load(sys.stdin); print((data.get("choices", [{}])[0].get("message", {}).get("content") or data.get("content", [{}])[0].get("text", "OK")))' 2>/dev/null || true)"
         ok "Connection test passed: ${reply:-OK}"
     else
         warn "Connection test failed (HTTP $http_code). Your config was still written."
@@ -484,8 +509,13 @@ print_summary() {
     echo -e "${GREEN}  ╚══════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "  Hermes home : ${CYAN}$HERMES_HOME${NC}"
-    echo -e "  Provider    : ${CYAN}Crazyrouter / OpenAI-compatible${NC}"
-    echo -e "  Base URL    : ${CYAN}$BASE_URL${NC}"
+    if is_claude_model "$MODEL"; then
+        echo -e "  Provider    : ${CYAN}Crazyrouter / Anthropic Messages${NC}"
+        echo -e "  Endpoint    : ${CYAN}${BASE_URL%/v1}/v1/messages${NC}"
+    else
+        echo -e "  Provider    : ${CYAN}Crazyrouter / OpenAI-compatible${NC}"
+        echo -e "  Endpoint    : ${CYAN}$BASE_URL/chat/completions${NC}"
+    fi
     echo -e "  Model       : ${CYAN}$MODEL${NC}"
     echo ""
     echo -e "  Start Hermes: ${CYAN}hermes${NC}"

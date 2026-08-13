@@ -75,7 +75,7 @@ After setup, switch models anytime inside Hermes:
 /model gpt-5.5
 /model claude-opus-4-7
 /model gpt-5.4
-/model claude-sonnet-4.6
+/model claude-sonnet-4-6
 /model gemini-3.1-pro
 /model deepseek-v4-flash
 /model gpt-4o
@@ -89,21 +89,33 @@ If you prefer to configure manually:
 
 **~/.hermes/.env**
 ```
-OPENAI_API_KEY=sk-your-crazyrouter-key
-OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
+CRAZYROUTER_API_KEY=sk-your-crazyrouter-key
 ```
 
-**~/.hermes/config.yaml**
+For Claude, use native Anthropic Messages:
+
 ```yaml
 model:
   provider: "custom"
   default: "claude-opus-4-8"
-  base_url: "https://cn.crazyrouter.com/v1"
+  base_url: "https://cn.crazyrouter.com"
+  api_mode: "anthropic_messages"
 ```
 
+For non-Claude models, use OpenAI-compatible chat completions:
+
+```yaml
+model:
+  provider: "custom"
+  default: "gpt-5.5"
+  base_url: "https://cn.crazyrouter.com/v1"
+  api_mode: "chat_completions"
+```
+
+Claude models must not use `codex_responses` or `/v1/responses`. Rerun the setup script when switching between Claude and non-Claude model families so Hermes updates both the base URL and API mode.
 ## What is Crazyrouter?
 
-Crazyrouter is an AI API gateway that gives you access to 627+ models (OpenAI, Anthropic, Google, DeepSeek, Gemini, and more) through a single API key and a single OpenAI-compatible endpoint. Pay-as-you-go, no subscriptions.
+Crazyrouter is an AI API gateway that gives you access to 627+ models (OpenAI, Anthropic, Google, DeepSeek, Gemini, and more) through a single API key, using Anthropic Messages for Claude and OpenAI-compatible chat for other models. Pay-as-you-go, no subscriptions.
 
 - 🌐 Website: [cn.crazyrouter.com](https://cn.crazyrouter.com)
 - 📖 Docs: [docs.crazyrouter.com](https://docs.crazyrouter.com)
