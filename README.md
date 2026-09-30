@@ -1,5 +1,10 @@
 # Crazyrouter × Hermes Agent Setup
 
+<!-- crazyrouter-links -->
+> - 📖 **完整接入指南（手动配置、Base URL 规则、推荐模型、FAQ）**：https://crazyrouter.com/zh/integrations/hermes?utm_source=github&utm_medium=readme&utm_campaign=hermes
+> - 💰 **模型价格对比（官方 / Azure / Bedrock / Vertex / Crazyrouter，每日核对）**：https://crazyrouter.com/zh/pricing?utm_source=github&utm_medium=readme&utm_campaign=hermes
+> - 🗂 **按厂商浏览全部模型**：https://crazyrouter.com/zh/models?utm_source=github&utm_medium=readme&utm_campaign=hermes
+
 One-click setup to connect [Hermes Agent](https://github.com/NousResearch/hermes-agent) with [Crazyrouter](https://crazyrouter.com) — access 627+ AI models through a single API key.
 
 ## What This Does
