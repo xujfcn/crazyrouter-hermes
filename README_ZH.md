@@ -1,9 +1,9 @@
 # Crazyrouter × Hermes Agent 一键配置说明
 
 <!-- crazyrouter-links -->
-> - 📖 **完整接入指南（手动配置、Base URL 规则、推荐模型、FAQ）**：https://crazyrouter.com/zh/integrations/hermes?utm_source=github&utm_medium=readme&utm_campaign=hermes
-> - 💰 **模型价格对比（官方 / Azure / Bedrock / Vertex / Crazyrouter，每日核对）**：https://crazyrouter.com/zh/pricing?utm_source=github&utm_medium=readme&utm_campaign=hermes
-> - 🗂 **按厂商浏览全部模型**：https://crazyrouter.com/zh/models?utm_source=github&utm_medium=readme&utm_campaign=hermes
+> - 📖 **完整接入指南（手动配置、Base URL 规则、推荐模型、FAQ）**：https://crazyrouter.com/zh/integrations/hermes?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_01__zh
+> - 💰 **模型价格对比（官方 / Azure / Bedrock / Vertex / Crazyrouter，每日核对）**：https://crazyrouter.com/zh/pricing?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_02__zh
+> - 🗂 **按厂商浏览全部模型**：https://crazyrouter.com/zh/models?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_03__zh
 
 这个仓库用于把 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 一键配置为使用 Crazyrouter。
 
@@ -41,7 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setu
 非交互模式：
 
 ```bash
-CRAZYROUTER_API_KEY=sk-your-key \
+CRAZYROUTER_API_KEY=sk-YOUR_API_KEY \
   bash <(curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh) \
   --yes --model claude-opus-4-8
 ```
@@ -74,7 +74,7 @@ setup.bat
 在 `~/.hermes/.env` 中写入：
 
 ```env
-CRAZYROUTER_API_KEY=sk-your-crazyrouter-key
+CRAZYROUTER_API_KEY=sk-YOUR_API_KEY
 ```
 
 Claude 必须使用 Anthropic Messages 原生协议：
@@ -197,5 +197,5 @@ https://cn.crazyrouter.com
 ## 相关链接
 
 - Crazyrouter: https://cn.crazyrouter.com
-- Docs: https://docs.crazyrouter.com
+- Docs: https://docs.crazyrouter.com?utm_source=github&utm_campaign=crazyrouter-hermes&utm_content=readme_04__zh&utm_medium=github_readme
 - Hermes Agent: https://github.com/NousResearch/hermes-agent

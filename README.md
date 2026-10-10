@@ -1,11 +1,11 @@
 # Crazyrouter × Hermes Agent Setup
 
 <!-- crazyrouter-links -->
-> - 📖 **完整接入指南（手动配置、Base URL 规则、推荐模型、FAQ）**：https://crazyrouter.com/zh/integrations/hermes?utm_source=github&utm_medium=readme&utm_campaign=hermes
-> - 💰 **模型价格对比（官方 / Azure / Bedrock / Vertex / Crazyrouter，每日核对）**：https://crazyrouter.com/zh/pricing?utm_source=github&utm_medium=readme&utm_campaign=hermes
-> - 🗂 **按厂商浏览全部模型**：https://crazyrouter.com/zh/models?utm_source=github&utm_medium=readme&utm_campaign=hermes
+> - 📖 **完整接入指南（手动配置、Base URL 规则、推荐模型、FAQ）**：https://crazyrouter.com/zh/integrations/hermes?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_01__zh
+> - 💰 **模型价格对比（官方 / Azure / Bedrock / Vertex / Crazyrouter，每日核对）**：https://crazyrouter.com/zh/pricing?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_02__zh
+> - 🗂 **按厂商浏览全部模型**：https://crazyrouter.com/zh/models?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_03__zh
 
-One-click setup to connect [Hermes Agent](https://github.com/NousResearch/hermes-agent) with [Crazyrouter](https://crazyrouter.com) — access 627+ AI models through a single API key.
+One-click setup to connect [Hermes Agent](https://github.com/NousResearch/hermes-agent) with [Crazyrouter](https://crazyrouter.com?utm_source=github&utm_campaign=crazyrouter-hermes&utm_content=readme_04__zh&utm_medium=github_readme) — access 627+ AI models through a single API key.
 
 ## What This Does
 
@@ -46,7 +46,7 @@ curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setu
 Non-interactive mode:
 
 ```bash
-CRAZYROUTER_API_KEY=sk-your-key \
+CRAZYROUTER_API_KEY=sk-YOUR_API_KEY \
   bash <(curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup-full.sh) \
   --yes --model claude-opus-4-8
 ```
@@ -69,7 +69,7 @@ setup.bat
 ## Prerequisites
 
 - [Hermes Agent](https://github.com/NousResearch/hermes-agent) installed
-- A Crazyrouter API key — get one at [crazyrouter.com](https://crazyrouter.com)
+- A Crazyrouter API key — get one at [crazyrouter.com](https://crazyrouter.com?utm_source=github&utm_campaign=crazyrouter-hermes&utm_content=readme_05__zh&utm_medium=github_readme)
 
 ## Available Models
 
@@ -86,7 +86,7 @@ After setup, switch models anytime inside Hermes:
 /model gpt-4o
 ```
 
-627+ models available. Full list at [crazyrouter.com](https://crazyrouter.com).
+627+ models available. Full list at [crazyrouter.com](https://crazyrouter.com?utm_source=github&utm_campaign=crazyrouter-hermes&utm_content=readme_06__zh&utm_medium=github_readme).
 
 ## Manual Setup
 
@@ -94,7 +94,7 @@ If you prefer to configure manually:
 
 **~/.hermes/.env**
 ```
-CRAZYROUTER_API_KEY=sk-your-crazyrouter-key
+CRAZYROUTER_API_KEY=sk-YOUR_API_KEY
 ```
 
 For Claude, use native Anthropic Messages:
@@ -123,7 +123,7 @@ Claude models must not use `codex_responses` or `/v1/responses`. Rerun the setup
 Crazyrouter is an AI API gateway that gives you access to 627+ models (OpenAI, Anthropic, Google, DeepSeek, Gemini, and more) through a single API key, using Anthropic Messages for Claude and OpenAI-compatible chat for other models. Pay-as-you-go, no subscriptions.
 
 - 🌐 Website: [cn.crazyrouter.com](https://cn.crazyrouter.com)
-- 📖 Docs: [docs.crazyrouter.com](https://docs.crazyrouter.com)
+- 📖 Docs: [docs.crazyrouter.com](https://docs.crazyrouter.com?utm_source=github&utm_campaign=crazyrouter-hermes&utm_content=readme_07__zh&utm_medium=github_readme)
 - 💬 Telegram: [t.me/crzrouter](https://t.me/crzrouter)
 
 ## License
