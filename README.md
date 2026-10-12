@@ -1,5 +1,10 @@
 # Crazyrouter × Hermes Agent Setup
 
+## Practical guides / 实操入口
+
+- [固定日志输入＋Agent 分类＋验收 / Log triage workflow](examples/log-triage/README.md)
+
+
 <!-- crazyrouter-links -->
 > - 📖 **完整接入指南（手动配置、Base URL 规则、推荐模型、FAQ）**：https://crazyrouter.com/zh/integrations/hermes?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_01__en
 > - 💰 **模型价格对比（官方 / Azure / Bedrock / Vertex / Crazyrouter，以页面日期为准）**：https://crazyrouter.com/zh/pricing?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_02__en

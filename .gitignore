@@ -1,0 +1,8 @@
+
+# Local diagnostics and workflow outputs
+results/
+__pycache__/
+*.local.toml
+*.backup-*
+triage.json
+diagnostic.json

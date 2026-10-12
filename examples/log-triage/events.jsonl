@@ -1,0 +1,5 @@
+{"id":"sample-01","status":401,"error_code":"invalid_api_key","protocol":"messages","note":"Synthetic fixture"}
+{"id":"sample-02","status":400,"error_code":"invalid_request_error","protocol":"responses","note":"Synthetic fixture"}
+{"id":"sample-03","status":429,"error_code":"rate_limit_exceeded","protocol":"chat","note":"Synthetic fixture"}
+{"id":"sample-04","status":404,"error_code":"model_not_found","protocol":"chat","note":"Synthetic fixture"}
+{"id":"sample-05","status":502,"error_code":"upstream_error","protocol":"chat","note":"Synthetic fixture"}
