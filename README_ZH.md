@@ -2,7 +2,7 @@
 
 <!-- crazyrouter-links -->
 > - 📖 **完整接入指南（手动配置、Base URL 规则、推荐模型、FAQ）**：https://crazyrouter.com/zh/integrations/hermes?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_01__zh
-> - 💰 **模型价格对比（官方 / Azure / Bedrock / Vertex / Crazyrouter，每日核对）**：https://crazyrouter.com/zh/pricing?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_02__zh
+> - 💰 **模型价格对比（官方 / Azure / Bedrock / Vertex / Crazyrouter，以页面日期为准）**：https://crazyrouter.com/zh/pricing?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_02__zh
 > - 🗂 **按厂商浏览全部模型**：https://crazyrouter.com/zh/models?utm_source=github&utm_medium=github_readme&utm_campaign=crazyrouter-hermes&utm_content=readme_03__zh
 
 这个仓库用于把 [Hermes Agent](https://github.com/NousResearch/hermes-agent) 一键配置为使用 Crazyrouter。
@@ -20,7 +20,7 @@ https://cn.crazyrouter.com/v1
 ~/.hermes/config.yaml
 ```
 
-> API Key 只写入本机配置文件，不会上传到其它地方。
+> API Key 保存在本机配置文件；连接测试和模型请求会将密钥发送到配置的 API 服务用于鉴权。
 
 ---
 
@@ -75,6 +75,7 @@ setup.bat
 
 ```env
 CRAZYROUTER_API_KEY=sk-YOUR_API_KEY
+OPENAI_API_KEY=sk-YOUR_API_KEY
 ```
 
 Claude 必须使用 Anthropic Messages 原生协议：
@@ -161,7 +162,7 @@ gpt-4o
 https://cn.crazyrouter.com/v1
 ```
 
-不建议写成：
+Claude / Anthropic Messages 则应使用不带 `/v1` 的地址：
 
 ```text
 https://cn.crazyrouter.com
@@ -169,7 +170,7 @@ https://cn.crazyrouter.com
 
 ### 2. API Key 会上传吗？
 
-不会。脚本只写入本地 Hermes 配置文件。
+密钥保存在本地配置文件。可选连接测试和正常模型调用会将密钥发送到配置的 API 服务用于鉴权。
 
 ### 3. 配置错了怎么恢复？
 
@@ -196,6 +197,6 @@ https://cn.crazyrouter.com
 
 ## 相关链接
 
-- Crazyrouter: https://cn.crazyrouter.com
-- Docs: https://docs.crazyrouter.com?utm_source=github&utm_campaign=crazyrouter-hermes&utm_content=readme_04__zh&utm_medium=github_readme
+- Crazyrouter: https://crazyrouter.com?utm_source=github&utm_campaign=crazyrouter-hermes&utm_content=readme_04__zh&utm_medium=github_readme
+- Docs: https://docs.crazyrouter.com?utm_source=github&utm_campaign=crazyrouter-hermes&utm_content=readme_05__zh&utm_medium=github_readme
 - Hermes Agent: https://github.com/NousResearch/hermes-agent
